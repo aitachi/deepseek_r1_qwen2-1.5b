@@ -32,6 +32,21 @@ print(f"基础模型路径: {base_model_path}")
 print(f"适配器路径: {adapter_path}")
 print(f"输出路径: {output_path}")
 
+# 确保冷启动适配器存在，如果不存在则提示用户
+if not os.path.exists(adapter_path):
+    print(f"警告: 冷启动适配器 '{adapter_path}' 不存在")
+    print("请先运行冷启动训练: python src/training/cold_start.py")
+    print("或者设置适配器路径为None以使用原始模型")
+
+    # 询问用户是否继续
+    user_input = input("是否继续而不使用适配器？(y/n): ")
+    if user_input.lower() != 'y':
+        print("退出程序。请先运行冷启动训练。")
+        exit(1)
+    else:
+        print("将继续而不使用适配器...")
+        adapter_path = None
+
 # 验证CUDA是否可用
 print("CUDA是否可用:", torch.cuda.is_available())
 if torch.cuda.is_available():
@@ -151,10 +166,14 @@ base_model = AutoModelForCausalLM.from_pretrained(
 print("为8位训练准备基础模型...")
 base_model = prepare_model_for_kbit_training(base_model)
 
-# 加载之前训练的适配器
-print(f"正在加载适配器 {adapter_path} 到基础模型...")
-model = PeftModel.from_pretrained(base_model, adapter_path)
-print("成功加载适配器模型")
+# 加载之前训练的适配器（如果存在）
+if adapter_path:
+    print(f"正在加载适配器 {adapter_path} 到基础模型...")
+    model = PeftModel.from_pretrained(base_model, adapter_path)
+    print("成功加载适配器模型")
+else:
+    print("未使用适配器，直接使用基础模型")
+    model = base_model
 
 # 确认GPU可用性
 if torch.cuda.is_available():
