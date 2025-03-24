@@ -76,12 +76,27 @@ bash scripts/train.sh
     运行所有场景RL
 
 单独运行各步骤
+### 冷启动训练
+
+冷启动是训练流程的第一步，旨在对模型进行初始微调，特别是增强其逻辑推理能力。
+
+冷启动阶段的特点：
+- 使用精心设计的高质量逻辑推理示例
+- 应用LoRA技术对模型关键参数进行高效微调
+- 为后续的拒绝采样SFT和强化学习阶段奠定基础
+- 冷启动训练会将生成的适配器保存在 models/cold_start_completed 目录中。
+
+运行冷启动训练：
+
+```bash
+python src/training/1_cot_start.py
+
 拒绝采样SFT
 
 这种方法为推理任务生成多个候选响应，并选择最佳的进行监督微调:
 bash
 
-python src/training/rejection_sampling_sft.py
+python src/training/2_rejection_sampling_sft.py
 
 推理RL
 
@@ -89,23 +104,23 @@ python src/training/rejection_sampling_sft.py
 
 ```bash
 
-  python src/training/reasoning_rl.py
+  python src/training/3_reasoning_rl.py
 ```
 
 所有场景RL
 在各种场景下用RL训练模型，包括潜在有害提示:
 
 ```bash
-python src/training/all_scenarios_rl.py
+python src/training/4_all_scenarios_rl.py
 ```
 
 训练流程
+
 训练遵循以下关键步骤:
 
-```txt
- 从 models/ 目录加载基础模型 (Qwen2-1.5B-Instruct)
- 通过拒绝采样生成训练数据
- 使用包含推理链的特殊格式数据进行微调
- 使用自定义奖励函数的RL技术进一步优化
- 将检查点保存到 checkpoints/ 目录
-```
+    冷启动(Cold Start)：使用简单的问答对对模型进行初始微调，创建基础的LoRA适配器
+    从 models/ 目录加载基础模型 (Qwen2-1.5B-Instruct) 和冷启动适配器
+    通过拒绝采样生成训练数据
+    使用包含推理链的特殊格式数据进行监督微调
+    使用自定义奖励函数的RL技术进一步优化
+    将检查点保存到 checkpoints/ 目录
