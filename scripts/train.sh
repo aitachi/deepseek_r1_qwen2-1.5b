@@ -33,19 +33,28 @@ else
     echo "模型已下载，跳过下载步骤。"
 fi
 
-# 2. 运行拒绝采样SFT
+# 2. 运行冷启动训练（如果需要）
+if [ ! -d "./models/1_cot_start_completed" ]; then
+    echo "开始冷启动训练..."
+    python src/training/cold_start.py
+    check_status
+else
+    echo "冷启动已完成，跳过冷启动步骤。"
+fi
+
+# 3. 运行拒绝采样SFT
 echo "开始拒绝采样SFT训练..."
-python src/training/rejection_sampling_sft.py
+python src/training/2_rejection_sampling_sft.py
 check_status
 
-# 3. 如果前一步成功，运行推理RL
+# 4. 如果前一步成功，运行推理RL
 echo "开始推理RL训练..."
-python src/training/reasoning_rl.py
+python src/training/3_reasoning_rl.py
 check_status
 
-# 4. 运行所有场景RL
+# 5. 运行所有场景RL
 echo "开始所有场景RL训练..."
-python src/training/all_scenarios_rl.py
+python src/training/4_all_scenarios_rl.py
 check_status
 
 echo "训练流程成功完成！"
