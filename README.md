@@ -23,13 +23,21 @@
 ## 项目结构
 
 ├── README.md
+
 ├── requirements.txt
+
 ├── src/ # 源代码
+
 │ ├── models/ # 模型定义和下载功能
+
 │ ├── training/ # 训练脚本
+
 │ └── utils/ # 工具函数
+
 ├── scripts/ # 便捷执行的Shell脚本
+
 ├── models/ # 下载的模型存储
+
 └── checkpoints/ # 训练得到的模型检查点
 
 ## 安装
