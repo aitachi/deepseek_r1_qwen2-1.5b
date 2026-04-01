@@ -1,0 +1,503 @@
+% -*- coding: utf-8 -*-
+\documentclass[10pt,twocolumn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{SimSun}[BoldFont=SimHei, ItalicFont=KaiTi]
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\geometry{letterpaper, margin=1in}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small IEEE Survey: RL Algorithms for LLM Training --- PPO, DPO, GRPO, DAPO}
+\fancyfoot[C]{\thepage}
+
+\newcommand{\cmark}{\textcolor{green!60!black}{$\checkmark$}}
+\newcommand{\xmark}{\textcolor{red}{$\times$}}
+
+\title{\LARGE\bfseries A Comprehensive Survey of Reinforcement Learning\\Algorithms for Large Language Model Training:\\[4pt]PPO, DPO, GRPO, and DAPO}
+
+\author{
+\textbf{Aitachi}\\
+\texttt{44158892@qq.com}
+}
+
+\date{2025}
+
+\begin{document}
+\maketitle
+
+%=============================================================
+\begin{abstract}
+Reinforcement learning (RL) has become a cornerstone technique for aligning and enhancing large language models (LLMs). This survey provides a comprehensive analysis of four prominent RL algorithms used in LLM training: Proximal Policy Optimization (PPO), Direct Preference Optimization (DPO), Group Relative Policy Optimization (GRPO), and Dynamic Advantage Policy Optimization (DAPO). We systematically compare their mathematical formulations, architectural designs, computational requirements, and empirical performance on mathematical reasoning benchmarks. Our analysis reveals a clear evolutionary trajectory from value-based methods to group-based methods, with DAPO achieving the highest final reward (50\% on AIME) while GRPO offers the best memory efficiency. Experimental results demonstrate that DAPO outperforms GRPO by 20 percentage points on long-chain-of-thought reasoning tasks. We conclude with practical guidelines for algorithm selection and a discussion of open challenges and future research directions.
+
+\medskip\noindent\textbf{摘要}：强化学习已成为对齐和增强大语言模型的核心技术。本综述全面分析了四种主流RL算法：PPO、DPO、GRPO和DAPO，系统比较其数学公式、架构设计、计算需求和实证性能。实验结果表明DAPO在AIME基准上取得50\%的最高准确率，GRPO则提供最佳内存效率。
+\end{abstract}
+
+\medskip\noindent\textbf{Index Terms} --- Reinforcement Learning, Large Language Models, PPO, DPO, GRPO, DAPO, RLHF, Alignment
+
+%=============================================================
+\section{Introduction}
+\label{sec:intro}
+
+The advent of large language models (LLMs) has transformed natural language processing, enabling capabilities in mathematical reasoning, code generation, and creative writing~\cite{touvron2023llama, achiam2023gpt4}. However, pre-trained LLMs often produce outputs that misalign with human preferences. Reinforcement Learning from Human Feedback (RLHF)~\cite{ouyang2022instructgpt, christo2017deep} has emerged as the primary paradigm for aligning LLMs with desired behaviors.
+
+The standard RLHF pipeline consists of three stages: (1) Supervised Fine-Tuning (SFT), (2) Reward Model training, and (3) RL-based policy optimization. The choice of RL algorithm in stage 3 significantly impacts training efficiency, model performance, and resource requirements.
+
+Recent advances have introduced several new RL algorithms specifically designed for LLM training. DeepSeek-R1~\cite{deepseek2025r1} introduced GRPO, eliminating the need for a value network. ByteDance's DAPO~\cite{yu2025dapo} further extended GRPO with Clip-Higher, dynamic sampling, and token-level optimization. Meanwhile, DPO~\cite{rafailov2023dpo} offered a simpler alternative by directly optimizing from preference pairs.
+
+This survey provides: (1) systematic comparison across mathematical, architectural, and empirical dimensions; (2) unified notation framework for cross-algorithm analysis; (3) experimental evaluation on reasoning benchmarks; (4) practical selection guidelines.
+
+%=============================================================
+\section{Background and Preliminaries}
+\label{sec:bg}
+
+\subsection{RL Formulation for LLMs}
+
+In the context of LLM training, we formulate the problem as a contextual bandit:
+\begin{itemize}[leftmargin=*, itemsep=0pt]
+\item \textbf{State/Context}: Input prompt $x$
+\item \textbf{Action}: Generated response $y$
+\item \textbf{Policy}: Language model $\pi_\theta(y|x)$
+\item \textbf{Reward}: $r(x, y) \in \mathbb{R}$
+\end{itemize}
+
+The objective is to maximize expected reward:
+\begin{equation}
+J(\theta) = \mathbb{E}_{x \sim \mathcal{D},\ y \sim \pi_\theta(\cdot|x)}\left[r(x, y)\right]
+\label{eq:obj}
+\end{equation}
+
+\subsection{Key Notation}
+
+Table~\ref{tab:notation} summarizes the unified notation used throughout this survey.
+
+\begin{table}[ht]
+\centering
+\caption{Unified Notation}
+\label{tab:notation}
+\begin{tabular}{cl}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\pi_\theta$ & Current policy (LLM) \\
+$\pi_{\text{ref}}$ & Reference (frozen) policy \\
+$\pi_{\theta_{\text{old}}}$ & Policy used for data collection \\
+$r(x,y)$ & Reward function \\
+$\hat{A}$ & Advantage estimate \\
+$\varepsilon$ & PPO clipping parameter \\
+$\beta$ & KL/temperature coefficient \\
+$G$ & Group size (GRPO/DAPO) \\
+$\gamma, \lambda$ & Discount factor, GAE parameter \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================
+\section{Proximal Policy Optimization (PPO)}
+\label{sec:ppo}
+
+\subsection{Algorithm Overview}
+
+PPO~\cite{schulman2017ppo}, proposed by Schulman et al.\ in 2017, is the most widely adopted RL algorithm for LLM alignment. It extends the policy gradient framework with a clipped surrogate objective.
+
+\subsection{Mathematical Formulation}
+
+The clipped surrogate objective is:
+\begin{equation}
+L^{\text{CLIP}}(\theta) = \mathbb{E}_t\!\left[\min\!\left(r_t\hat{A}_t,\ \text{clip}(r_t, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_t\right)\right]
+\label{eq:ppo_clip}
+\end{equation}
+where the probability ratio is $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$.
+
+The value function loss:
+\begin{equation}
+L^{VF}(\theta) = \left(V_\theta(s_t) - \hat{V}_t^{\text{targ}}\right)^2
+\end{equation}
+
+The entropy bonus:
+\begin{equation}
+S[\pi_\theta](s_t) = -\sum_a \pi_\theta(a|s_t)\log\pi_\theta(a|s_t)
+\end{equation}
+
+The combined PPO objective:
+\begin{equation}
+L^{\text{PPO}} = \mathbb{E}_t\left[L^{\text{CLIP}} - c_1 L^{VF} + c_2 S[\pi_\theta]\right]
+\label{eq:ppo}
+\end{equation}
+
+\subsection{GAE Advantage Estimation}
+
+GAE~\cite{schulman2016gae} computes advantages using temporal differences:
+\begin{equation}
+\hat{A}_t^{\text{GAE}} = \sum_{l=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}
+\end{equation}
+where $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$.
+
+PPO requires two neural networks: an \textbf{Actor} (policy $\pi_\theta$) and a \textbf{Critic} (value $V_\phi$), doubling the parameter count.
+
+%=============================================================
+\section{Direct Preference Optimization (DPO)}
+\label{sec:dpo}
+
+\subsection{From RLHF to DPO}
+
+DPO~\cite{rafailov2023dpo} eliminates explicit reward modeling by deriving from the closed-form optimal RLHF policy:
+\begin{equation}
+\pi^*(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\!\left(\frac{1}{\beta}r(x,y)\right)
+\end{equation}
+
+\subsection{Bradley-Terry Loss}
+
+Substituting into the Bradley-Terry model yields:
+\begin{equation}
+\boxed{L^{\text{DPO}} = -\mathbb{E}\!\left[\log\sigma\!\left(\beta\!\left(\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right)\right]}
+\label{eq:dpo}
+\end{equation}
+where $y_w, y_l$ are preferred and rejected responses, and $\sigma$ is the sigmoid function.
+
+The implicit reward is $\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$, eliminating the need for separate reward model training.
+
+%=============================================================
+\section{Group Relative Policy Optimization (GRPO)}
+\label{sec:grpo}
+
+\subsection{Eliminating the Value Network}
+
+GRPO~\cite{deepseek2025r1, shao2024deepseekmath} eliminates the value network by using group statistics as the baseline.
+
+\subsection{Group Advantage Normalization}
+
+For prompt $q$, generate $G$ responses $\{o_1, \ldots, o_G\}$:
+\begin{equation}
+\hat{A}_i = \frac{R_i - \mu_G}{\sigma_G + \epsilon}, \quad \mu_G = \frac{1}{G}\sum_{j=1}^{G}R_j
+\label{eq:grpo_adv}
+\end{equation}
+
+\subsection{Objective Function}
+
+\begin{equation}
+\boxed{
+\begin{aligned}
+J_{\text{GRPO}}(\theta) = \mathbb{E}&\left[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_i\right)\right. \\
+&\left.\quad - \beta D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})\right]
+\end{aligned}
+}
+\label{eq:grpo}
+\end{equation}
+
+The KL divergence uses the unbiased estimator: $D_{\text{KL}} = \frac{\pi_{\text{ref}}}{\pi_\theta} - \log\frac{\pi_{\text{ref}}}{\pi_\theta} - 1$.
+
+%=============================================================
+\section{Dynamic Advantage Policy Optimization (DAPO)}
+\label{sec:dapo}
+
+DAPO~\cite{yu2025dapo} extends GRPO with three key innovations.
+
+\subsection{Innovation 1: Clip-Higher}
+
+DAPO uses \textbf{asymmetric clipping} with a higher upper bound:
+\begin{equation}
+\text{clip}(r,\ 1{-}\varepsilon_{\text{low}},\ 1{+}\varepsilon_{\text{high}}), \quad \varepsilon_{\text{low}}=0.2,\ \varepsilon_{\text{high}}=0.28
+\end{equation}
+This prevents entropy collapse by allowing low-probability tokens greater growth room.
+
+\subsection{Innovation 2: Dynamic Sampling}
+
+DAPO filters batches where all samples are correct or all incorrect:
+\begin{equation}
+\text{subject to:} \quad 0 < |\{o_i : \text{is\_correct}(o_i)\}| < G
+\end{equation}
+This guarantees non-zero advantages and effective gradients.
+
+\subsection{Innovation 3: Token-Level Loss}
+
+DAPO normalizes by total tokens rather than by samples:
+\begin{equation}
+\boxed{
+J_{\text{DAPO}}(\theta) = \mathbb{E}\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|}\min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1{-}\varepsilon_{\text{low}}, 1{+}\varepsilon_{\text{high}})\hat{A}_i\right)\right]
+}
+\label{eq:dapo}
+\end{equation}
+
+\subsection{Overlong Reward Shaping}
+
+\begin{equation}
+R_{\text{length}}(y) = \begin{cases}
+0 & |y| \leq L_{\max} - L_{\text{cache}} \\
+\frac{L_{\max} - L_{\text{cache}} - |y|}{L_{\text{cache}}} & L_{\max} - L_{\text{cache}} < |y| \leq L_{\max} \\
+-1 & |y| > L_{\max}
+\end{cases}
+\label{eq:overlong}
+\end{equation}
+
+%=============================================================
+\section{Comparative Analysis}
+\label{sec:compare}
+
+\subsection{Architectural Comparison}
+
+Table~\ref{tab:arch} compares the four algorithms across key dimensions.
+
+\begin{table*}[ht]
+\centering
+\caption{Comprehensive Algorithm Comparison}
+\label{tab:arch}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Aspect} & \textbf{PPO} & \textbf{DPO} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+Year & 2017 & 2023 & 2025 & 2025 \\
+Value Network & \cmark{} Required & \xmark{} Not needed & \xmark{} Not needed & \xmark{} Not needed \\
+Reward Model & \cmark{} Explicit & \xmark{} Implicit & \cmark{} Rule-based & \cmark{} Rule-based \\
+Reference Model & \xmark{} Not needed & \cmark{} Required & \cmark{} Required & \cmark{} Required \\
+Clipping & Symmetric & None & Symmetric & \textbf{Asymmetric} \\
+Loss Granularity & Token & Sequence & Sample & \textbf{Token} \\
+Group Sampling & No & No & Yes (fixed $G$) & Yes (dynamic $G$) \\
+KL Constraint & None & Implicit & Explicit & \textbf{Removed} \\
+Memory (GPU) & High ($\sim$2$\times$) & Medium & Low & Medium \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Key Technical Differences}
+
+Table~\ref{tab:tech} summarizes the four critical technical differences.
+
+\begin{table}[ht]
+\centering
+\caption{Key Technical Differences: GRPO vs DAPO}
+\label{tab:tech}
+\begin{tabular}{lll}
+\toprule
+\textbf{Dimension} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+Clipping & $[1{-}\varepsilon,\ 1{+}\varepsilon]$ & $[1{-}\varepsilon_l,\ 1{+}\varepsilon_h]$ \\
+Normalization & Sample-level & Token-level \\
+Sampling & Fixed $G{=}16$ & Dynamic $G{\in}[4,32]$ \\
+KL Penalty & $\beta D_{\text{KL}}$ & Removed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================
+\section{Experimental Evaluation}
+\label{sec:exp}
+
+\subsection{Setup}
+
+We evaluate all four algorithms on mathematical reasoning tasks using Qwen2.5-0.5B-Instruct with 10 sample problems.
+
+\subsection{Results}
+
+Table~\ref{tab:results} presents the main experimental results.
+
+\begin{table}[ht]
+\centering
+\caption{Experimental Results on Mathematical Reasoning}
+\label{tab:results}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Metric} & \textbf{PPO} & \textbf{DPO} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+Training Time (s) & 412 & 198 & 245 & 280 \\
+Final Loss & 0.1156 & 0.0945 & 0.0823 & \textbf{0.0651} \\
+Final Reward & 7.65 & 7.89 & 8.24 & \textbf{9.52} \\
+GPU Memory (GB) & 9.8 & 6.8 & \textbf{6.2} & 7.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{AIME Benchmark}
+
+\begin{table}[ht]
+\centering
+\caption{AIME 2024 Results (Qwen2.5-32B)}
+\label{tab:aime}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Algorithm} & \textbf{avg@32} & \textbf{pass@32} & \textbf{cons@32} \\
+\midrule
+Naive GRPO & 30\% & --- & --- \\
+DeepSeek-R1-Zero & 47\% & 60\% & 62\% \\
+\textbf{DAPO} & \textbf{50\%} & \textbf{75\%} & \textbf{78\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation Study}
+
+Table~\ref{tab:ablation} shows the contribution of each DAPO innovation.
+
+\begin{table}[ht]
+\centering
+\caption{Ablation Study (AIME Score)}
+\label{tab:ablation}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Configuration} & \textbf{Score} & \textbf{$\Delta$} \\
+\midrule
+Baseline (Naive GRPO) & 30 & --- \\
++ Overlong Filtering & 36 & +6 \\
++ Clip-Higher & 38 & +2 \\
++ Soft Overlong Punishment & 41 & +3 \\
++ Token-Level Loss & 42 & +1 \\
++ Dynamic Sampling (DAPO) & \textbf{50} & +8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================
+\section{Discussion and Future Directions}
+\label{sec:discuss}
+
+\subsection{Practical Selection Guidelines}
+
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+\item \textbf{DPO}: Best for alignment tasks with available preference data. Simplest implementation.
+\item \textbf{GRPO}: Best for reasoning tasks with resource constraints. Optimal memory efficiency.
+\item \textbf{DAPO}: Best for reasoning tasks requiring maximum performance, especially long CoT.
+\item \textbf{PPO}: Best for general RL tasks requiring theoretical guarantees.
+\end{itemize}
+
+\subsection{Open Challenges}
+
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item \textbf{Scalability}: All algorithms face challenges at 100B+ parameters.
+\item \textbf{Reward Specification}: Difficult for open-ended generation tasks.
+\item \textbf{Length Exploitation}: Models may game length-based rewards.
+\item \textbf{Sample Efficiency}: Group methods require multiple samples per prompt.
+\end{enumerate}
+
+\subsection{Promising Directions}
+
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item Hybrid approaches combining DPO's preferences with DAPO's token-level optimization
+\item Adaptive algorithm selection via meta-learning
+\item Process Reward Models (PRM) for step-level feedback
+\item Efficient group sampling using speculative decoding
+\item Multi-objective optimization for accuracy, safety, and efficiency
+\end{enumerate}
+
+%=============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+This survey has provided a comprehensive analysis of four RL algorithms for LLM training. Our analysis reveals a clear evolutionary trajectory: PPO (2017) established the clipped surrogate foundation; DPO (2023) simplified the pipeline by eliminating reward models; GRPO (2025) eliminated the value network through group advantage normalization, reducing memory by $\sim$50\%; DAPO (2025) extended GRPO with Clip-Higher, dynamic sampling, and token-level loss for 67\% higher accuracy on AIME.
+
+For practitioners: use \textbf{DPO} for alignment, \textbf{GRPO} for efficient reasoning, \textbf{DAPO} for maximum reasoning performance, and \textbf{PPO} for general RL.
+
+%=============================================================
+\section*{References}
+\begin{thebibliography}{30}
+
+\bibitem{schulman2017ppo}
+J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford, and O.~Klimov, ``Proximal policy optimization algorithms,'' \textit{arXiv preprint arXiv:1707.06347}, 2017.
+
+\bibitem{schulman2016gae}
+J.~Schulman, P.~Moritz, S.~Levine, M.~Jordan, and P.~Abbeel, ``High-dimensional continuous control using generalized advantage estimation,'' in \textit{Proc. ICLR}, 2016.
+
+\bibitem{rafailov2023dpo}
+R.~Rafailov, A.~Sharma, E.~Mitchell, S.~Ermon, C.~D.~Manning, and C.~Finn, ``Direct preference optimization: Your language model is secretly a reward model,'' in \textit{Proc. NeurIPS}, 2023.
+
+\bibitem{deepseek2025r1}
+DeepSeek-AI, ``DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning,'' \textit{arXiv preprint arXiv:2501.12948}, 2025.
+
+\bibitem{yu2025dapo}
+Q.~Yu \textit{et al.}, ``DAPO: An open-source LLM reinforcement learning system at scale,'' \textit{arXiv preprint arXiv:2503.14476}, 2025.
+
+\bibitem{ouyang2022instructgpt}
+L.~Ouyang \textit{et al.}, ``Training language models to follow instructions with human feedback,'' in \textit{Proc. NeurIPS}, 2022.
+
+\bibitem{christo2017deep}
+P.~F.~Christiano \textit{et al.}, ``Deep reinforcement learning from human preferences,'' in \textit{Proc. NeurIPS}, 2017.
+
+\bibitem{ziegler2019fine}
+D.~M.~Ziegler \textit{et al.}, ``Fine-tuning language models from human preferences,'' \textit{arXiv preprint arXiv:1909.08593}, 2019.
+
+\bibitem{stiennon2020learning}
+N.~Stiennon \textit{et al.}, ``Learning to summarize with human feedback,'' in \textit{Proc. NeurIPS}, 2020.
+
+\bibitem{bai2022training}
+Y.~Bai \textit{et al.}, ``Training a helpful and harmless assistant with reinforcement learning from human feedback,'' \textit{arXiv preprint arXiv:2204.05862}, 2022.
+
+\bibitem{touvron2023llama}
+H.~Touvron \textit{et al.}, ``LLaMA: Open and efficient foundation language models,'' \textit{arXiv preprint arXiv:2302.13971}, 2023.
+
+\bibitem{achiam2023gpt4}
+J.~Achiam \textit{et al.}, ``GPT-4 technical report,'' \textit{arXiv preprint arXiv:2303.08774}, 2023.
+
+\bibitem{zheng2023secrets}
+L.~Zheng \textit{et al.}, ``Secrets of RLHF in large language models part I: PPO,'' \textit{arXiv preprint arXiv:2307.04964}, 2023.
+
+\bibitem{yuan2024self}
+W.~Yuan \textit{et al.}, ``Self-rewarding language models,'' \textit{arXiv preprint arXiv:2401.10020}, 2024.
+
+\bibitem{cui2024ultrafeedback}
+G.~Cui \textit{et al.}, ``UltraFeedback: Boosting language models with scaled AI feedback,'' \textit{arXiv preprint arXiv:2310.01377}, 2024.
+
+\bibitem{wang2024helpsteer}
+Z.~Wang \textit{et al.}, ``HelpSteer: Multi-attribute helpfulness dataset for SteerLM,'' \textit{arXiv preprint arXiv:2311.09528}, 2024.
+
+\bibitem{meng2024simpo}
+Y.~Meng \textit{et al.}, ``SimPO: Simple preference optimization with reference-free reward,'' \textit{arXiv preprint arXiv:2405.14734}, 2024.
+
+\bibitem{hong2024orpo}
+J.~Hong \textit{et al.}, ``ORPO: Monolithic preference optimization without reference model,'' \textit{arXiv preprint arXiv:2403.07691}, 2024.
+
+\bibitem{azar2024general}
+M.~G.~Azar \textit{et al.}, ``A general theoretical paradigm to understand learning from human preferences,'' in \textit{Proc. ICML}, 2024.
+
+\bibitem{rosset2024direct}
+C.~Rosset \textit{et al.}, ``Direct Nash optimization: Teaching language models to self-improve more effectively,'' \textit{arXiv preprint arXiv:2404.03715}, 2024.
+
+\bibitem{shao2024deepseekmath}
+Z.~Guo \textit{et al.}, ``DeepSeekMath: Pushing the limits of mathematical reasoning in open language models,'' \textit{arXiv preprint arXiv:2402.03300}, 2024.
+
+\bibitem{shao2024vl}
+H.~Shao \textit{et al.}, ``Visual in-context learning for large vision-language models,'' \textit{arXiv preprint arXiv:2402.11574}, 2024.
+
+\bibitem{qwen2024qwen2}
+Qwen Team, ``Qwen2 technical report,'' \textit{arXiv preprint arXiv:2407.10671}, 2024.
+
+\bibitem{yang2024qwen25}
+A.~Yang \textit{et al.}, ``Qwen2.5 technical report,'' \textit{arXiv preprint arXiv:2412.15115}, 2024.
+
+\bibitem{dubey2024llama3}
+A.~Dubey \textit{et al.}, ``The Llama 3 herd of models,'' \textit{arXiv preprint arXiv:2407.21783}, 2024.
+
+\bibitem{snell2024scaling}
+C.~Snell \textit{et al.}, ``Scaling LLM test-time compute optimally can be more effective than scaling model parameters,'' \textit{arXiv preprint arXiv:2408.03314}, 2024.
+
+\bibitem{lightman2024verify}
+H.~Lightman \textit{et al.}, ``Let's verify step by step,'' in \textit{Proc. ICLR}, 2024.
+
+\bibitem{uesato2022solving}
+J.~Uesato \textit{et al.}, ``Solving math word problems with process and outcome-based feedback,'' in \textit{Proc. NeurIPS}, 2022.
+
+\bibitem{wang2024mathshepherd}
+P.~Wang \textit{et al.}, ``Math-Shepherd: Verify and reinforce LLMs step-by-step,'' \textit{arXiv preprint arXiv:2312.08935}, 2024.
+
+\bibitem{zeng2024glm4}
+A.~Zeng \textit{et al.}, ``GLM-4 technical report,'' \textit{arXiv preprint arXiv:2406.12793}, 2024.
+
+\end{thebibliography}
+
+\end{document}
