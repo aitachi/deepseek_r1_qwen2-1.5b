@@ -46,7 +46,7 @@ import json
 import torch
 import torch.nn.functional as F
 from torch.distributions import Categorical
-from transformers import AutoModel ForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import List, Dict, Tuple, Optional
 import numpy as np
 from tqdm import tqdm
@@ -341,8 +341,11 @@ class GRPOTrainer:
         advantages = self.compute_advantages(rewards)
 
         # Step 4: Compute policy ratios and losses
-        total_loss = 0.0
-        total_kl = 0.0
+        # NOTE: Must accumulate tensor losses (not .item()) to preserve
+        # the computation graph for backpropagation.
+        # 必须累积 tensor 损失（不要用 .item()）以保留计算图用于反向传播。
+        total_loss = torch.tensor(0.0, device=self.device, requires_grad=True)
+        total_kl_val = 0.0
 
         formatted_prompt = f"<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
 
@@ -365,7 +368,15 @@ class GRPOTrainer:
                 outputs_ref = self.ref_model(**inputs, labels=inputs["input_ids"])
                 log_prob_ref = -outputs_ref.loss
 
-            # Compute ratio: π_θ(o|q) / π_θ_old(o|q)
+            # Compute ratio: π_θ(o|q) / π_ref(o|q)
+            # Note: In the original GRPO paper, the ratio uses π_θ_old (the
+            # policy that generated the samples). Here we use π_ref as a proxy
+            # for the old policy — this is a common simplification in practical
+            # implementations (e.g., TRL). The ref_model serves dual purpose:
+            #   1. As old policy for importance sampling ratio
+            #   2. As reference for KL divergence penalty
+            # 注: 原始 GRPO 论文中 ratio 使用 π_θ_old (生成样本时的策略)。
+            # 此处使用 π_ref 作为旧策略的近似 — 这是实际实现中的常见简化(如 TRL)。
             ratio = torch.exp(log_prob_current - log_prob_ref)
 
             # GRPO clipped objective
@@ -383,23 +394,22 @@ class GRPOTrainer:
             # KL divergence
             kl_div = self.compute_kl_divergence(log_prob_current, log_prob_ref)
 
-            # Total loss with KL penalty
+            # Total loss with KL penalty (keep as tensor!)
             loss = policy_loss + self.config.beta * kl_div
+            total_loss = total_loss + loss
+            total_kl_val += kl_div.item()
 
-            total_loss += loss.item()
-            total_kl += kl_div.item()
+        # Average loss over group (still a tensor with grad)
+        avg_loss_tensor = total_loss / self.config.group_size
+        avg_kl = total_kl_val / self.config.group_size
 
-        # Average loss over group
-        avg_loss = total_loss / self.config.group_size
-        avg_kl = total_kl / self.config.group_size
-
-        # Backpropagation
+        # Backpropagation (gradient flows through the computation graph)
         self.optimizer.zero_grad()
-        torch.tensor(avg_loss, requires_grad=True).backward()
+        avg_loss_tensor.backward()
         self.optimizer.step()
 
         return {
-            "loss": avg_loss,
+            "loss": avg_loss_tensor.item(),
             "avg_reward": rewards.mean().item(),
             "max_reward": rewards.max().item(),
             "kl_divergence": avg_kl
