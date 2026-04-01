@@ -1,274 +1,256 @@
 """
-DAPO (Dynamic Advantage Policy Optimization) Training Implementation
-DAPO (动态优势策略优化) 训练实现
+DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization) Training Implementation
 
-Based on the paper: "DAPO: An Open-Source LLM Reinforcement Learning System
-for Reasoning-Centric Task-Oriented Policy Optimization"
-基于论文: "DAPO: 面向推理任务的开放式大语言模型强化学习系统"
+This implementation is based on the DAPO paper:
+"DAPO: An Open-Source LLM Reinforcement Learning System at Scale"
 
 Author: Aitachi
 Contact: 44158892@qq.com
 Date: 2025
 
-Mathematical Formulation / 数学公式:
+Mathematical Formulation:
 =======================
 
-DAPO extends GRPO with dynamic sampling, overlong filtering, and token-level
-loss computation. The core objective is:
-DAPO 在 GRPO 的基础上引入了动态采样、过长过滤和 token 级别损失计算。核心目标为:
+DAPO optimizes the following objective function:
 
-L_DAPO(θ) = -E_{q~P(Q), {o_i}^G_{i=1}~π_θold}[
-    1/(∑|o_i|) ∑^G_{i=1} (1/|o_i|) ∑_{t=1}^{|o_i|} min(
-        r_t(θ) * Â_i,
-        clip(r_t(θ), 1-ε, 1+ε) * Â_i
-    )
-    - β * D_KL(π_θ || π_ref)
-]
+J_DAPO(θ) = E[(q,a)~D, {o_i}^G_{i=1}~π_{θ_old}(·|q)]
+            [
+              1/(∑^G_{i=1}|o_i|) ∑^G_{i=1} ∑^|o_i|_{t=1} min(
+                r_{i,t}(θ) * Â_{i,t},
+                clip(r_{i,t}(θ), 1-ε_low, 1+ε_high) * Â_{i,t}
+              )
+            ]
 
-Where / 其中:
-- θ: Current policy parameters / 当前策略参数
-- θ_old: Old policy parameters / 旧策略参数
-- q: Input question / prompt / 输入问题/提示
-- o_i: i-th output sample / 第 i 个输出样本
-- G: Dynamic group size (adjusted during training) / 动态组大小(训练中调整)
-- ε: Clipping parameter / 裁剪参数
-- β: KL divergence coefficient / KL散度系数
-- |o_i|: Length of output i / 输出 i 的长度
+subject to: 0 < |{o_i | is_equivalent(a, o_i)}| < G
 
-Key Innovations over GRPO / 相对 GRPO 的关键创新:
-=================================================
-1. Token-Level Loss / Token级别损失:
-   Normalizes loss by output length to prevent length bias
-   按输出长度归一化损失, 防止长度偏差
+Where:
+- θ: Current policy parameters
+- θ_old: Old policy parameters
+- q: Input question/prompt
+- a: Correct answer
+- o_i: i-th output sample
+- G: Group size (number of samples per question)
+- ε_low: Lower clipping parameter (typically 0.2)
+- ε_high: Higher clipping parameter (typically 0.28)
+- r_{i,t}(θ): Importance sampling ratio at time t
+- Â_{i,t}: Advantage function at time t
 
-2. Dynamic Sampling / 动态采样:
-   Adjusts group size G based on reward variance during training
-   根据训练中的奖励方差动态调整组大小 G
+Key Techniques:
+===============
 
-3. Overlong Filtering / 过长过滤:
-   Filters responses exceeding max length before advantage computation
-   在优势计算前过滤超过最大长度的响应
+1. Clip-Higher: Decoupled clipping ranges [1-ε_low, 1+ε_high]
+   - Promotes diversity and avoids entropy collapse
+   - Allows low-probability tokens to increase more
 
-4. Reward Shaping / 奖励塑形:
-   Uses per-token reward decomposition for finer gradient signals
-   使用逐token奖励分解以获得更精细的梯度信号
+2. Dynamic Sampling: Filter samples with accuracy = 0 or 1
+   - Ensures all samples have effective gradients
+   - Maintains consistent batch size
 
-Advantage Calculation / 优势计算:
-Â_i = (r_i - mean({r_j : |o_j| ≤ L_max})) / std({r_j : |o_j| ≤ L_max})
+3. Token-Level Policy Gradient Loss: Average over tokens not samples
+   - Better handles long CoT scenarios
+   - Prevents low-quality long samples from dominating
 
-Overlong Filtering / 过长过滤:
-Only samples with |o_i| ≤ L_max participate in advantage computation
-只有满足 |o_i| ≤ L_max 的样本参与优势计算
+4. Overlong Reward Shaping: Soft punishment for overlong samples
+   - R_length(y) = 0 if |y| ≤ L_max - L_cache
+   - R_length(y) = (L_max - L_cache - |y|) / L_cache if in punishment interval
+   - R_length(y) = -1 if |y| > L_max
 
-Token-Level Policy Gradient / Token级别策略梯度:
-For each output o_i with T_i tokens:
-对于每个具有 T_i 个 token 的输出 o_i:
-g_i = (1/T_i) ∑_{t=1}^{T_i} ∇_θ log π_θ(o_{i,t} | q, o_{i,<t}) * Â_i
+Advantage Calculation:
+Â_{i,t} = (R_i - mean({R_1, R_2, ..., R_G})) / (std({R_1, R_2, ..., R_G}) + eps)
 
-KL Divergence (per-token) / KL散度(逐token):
-D_KL(π_θ || π_ref) = (1/T) ∑_{t=1}^{T} [
-    π_ref(o_t|q,o_{<t}) / π_θ(o_t|q,o_{<t})
-    - log(π_ref(o_t|q,o_{<t}) / π_θ(o_t|q,o_{<t}))
-    - 1
-]
+Where R_i is the reward for output o_i.
 """
 
 import os
 import json
-import math
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import List, Dict, Tuple, Optional
 import numpy as np
 from tqdm import tqdm
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-# Set up logging / 设置日志
+# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class DAPOConfig:
-    """
-    Configuration for DAPO training
-    DAPO 训练配置
-    """
-    # Model parameters / 模型参数
+    """Configuration for DAPO training"""
+
+    # Model parameters
     model_name: str = "Qwen/Qwen2.5-0.5B-Instruct"
 
-    # DAPO hyperparameters / DAPO 超参数
-    initial_group_size: int = 16       # Initial G / 初始组大小
-    min_group_size: int = 4            # Minimum group size / 最小组大小
-    max_group_size: int = 32           # Maximum group size / 最大组大小
-    clip_epsilon: float = 0.2          # ε - PPO clipping parameter / PPO裁剪参数
-    beta: float = 0.01                 # KL divergence coefficient / KL散度系数
-    max_response_length: int = 512     # L_max - max response length / 最大响应长度
-    dynamic_sampling_threshold: float = 0.3  # Variance threshold for group resize / 方差阈值
+    # DAPO hyperparameters
+    group_size: int = 16  # G in the formula - number of samples per question
+    clip_epsilon_low: float = 0.2  # ε_low - lower clipping parameter
+    clip_epsilon_high: float = 0.28  # ε_high - higher clipping parameter (Clip-Higher)
 
-    # Reward shaping parameters / 奖励塑形参数
-    accuracy_reward: float = 10.0      # Reward for correct answer / 正确答案奖励
-    partial_reward: float = 2.0        # Reward for partial correctness / 部分正确奖励
-    format_reward: float = 0.5         # Reward for format compliance / 格式合规奖励
-    length_penalty: float = 0.001      # Per-token length penalty / 逐token长度惩罚
+    # Dynamic sampling parameters
+    enable_dynamic_sampling: bool = True  # Filter samples with acc=0 or acc=1
+    max_sampling_tries: int = 5  # Maximum attempts to fill batch
 
-    # Training parameters / 训练参数
-    learning_rate: float = 1e-5
+    # Training parameters
+    learning_rate: float = 1e-6  # Lower LR as per paper
     max_epochs: int = 3
-    batch_size: int = 4
-    max_length: int = 1024
-    temperature: float = 0.7
-    use_token_level_loss: bool = True  # Enable token-level loss / 启用token级别损失
+    batch_size: int = 512  # Prompt batch size from paper
+    gradient_updates_per_rollout: int = 16  # Mini-batch updates
+    max_length: int = 16384  # Maximum expected length
+    soft_punish_cache: int = 4096  # Additional tokens for soft punishment
+    max_generation_tokens: int = 20480  # Max tokens for generation (16384 + 4096)
+    temperature: float = 1.0  # Temperature from paper
+    top_p: float = 0.7  # Top-p sampling from paper
 
-    # Device / 设备
+    # Reward parameters
+    correct_reward: float = 1.0  # Reward for correct answer
+    incorrect_reward: float = -1.0  # Reward for incorrect answer
+
+    # Device
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # Paths / 路径
+    # Paths
     output_dir: str = "./checkpoints/dapo_model"
+    log_dir: str = "./logs/dapo"
 
 
-class RewardShaper:
+class RewardModel:
     """
-    Reward shaping module for DAPO
-    DAPO 的奖励塑形模块
+    Rule-based reward model for DAPO.
 
-    Decomposes rewards into per-token components for finer gradient signals
-    将奖励分解为逐token组件以获得更精细的梯度信号
+    Uses simple accuracy-based rewards:
+    R(ŷ, y) = 1 if is_equivalent(ŷ, y)
+    R(ŷ, y) = -1 otherwise
+
+    Plus length-based reward shaping for overlong samples.
     """
 
     def __init__(self, config: DAPOConfig):
         self.config = config
-        # Reward decay factor for per-token decomposition / 逐token分解的奖励衰减因子
-        self.reward_decay = 0.99
 
-    def compute_base_reward(
+    def compute_reward(
         self,
         question: str,
         response: str,
         correct_answer: str
-    ) -> float:
+    ) -> Tuple[float, bool]:
         """
-        Compute base reward for a complete response
-        计算完整响应的基础奖励
+        Compute reward for a generated response.
 
         Args:
-            question: Input question / 输入问题
-            response: Model generated response / 模型生成的响应
-            correct_answer: Ground truth answer / 正确答案
+            question: Input question
+            response: Model generated response
+            correct_answer: Ground truth answer
 
         Returns:
-            Total reward score / 总奖励分数
+            Tuple of (reward, is_correct)
         """
-        reward = 0.0
-
-        # Extract predicted answer / 提取预测答案
+        # Extract answer from response
         predicted_answer = self._extract_answer(response)
 
-        # Accuracy reward / 准确性奖励
-        if predicted_answer.lower().strip() == correct_answer.lower().strip():
-            reward += self.config.accuracy_reward
-        elif self._is_partially_correct(predicted_answer, correct_answer):
-            reward += self.config.partial_reward
+        # Check correctness
+        is_correct = self._is_equivalent(predicted_answer, correct_answer)
 
-        # Format reward - encourage structured thinking / 格式奖励 - 鼓励结构化思考
-        if "<think" in response and "</think" in response:
-            reward += self.config.format_reward
+        # Base reward
+        base_reward = self.config.correct_reward if is_correct else self.config.incorrect_reward
 
-        # Length penalty - discourage overly verbose responses / 长度惩罚 - 惩罚过度冗长的响应
-        tokens = response.split()
-        reward -= self.config.length_penalty * len(tokens)
+        # Add length penalty
+        length_penalty = self._compute_length_penalty(response)
 
-        return reward
+        total_reward = base_reward + length_penalty
 
-    def decompose_reward(
-        self,
-        base_reward: float,
-        response_length: int
-    ) -> torch.Tensor:
-        """
-        Decompose reward into per-token rewards using exponential decay
-        使用指数衰减将奖励分解为逐token奖励
-
-        The final tokens receive the highest reward signal, with exponential
-        decay applied to earlier tokens. This encourages the model to focus
-        on the conclusion.
-
-        最后的 token 接收最高的奖励信号, 对前面的 token 应用指数衰减。
-        这鼓励模型关注结论部分。
-
-        Args:
-            base_reward: Total reward for the response / 响应的总奖励
-            response_length: Number of tokens in response / 响应中的 token 数量
-
-        Returns:
-            Per-token reward tensor / 逐token奖励张量
-        """
-        if response_length == 0:
-            return torch.tensor([0.0])
-
-        # Create exponentially increasing weights / 创建指数增长的权重
-        # Later tokens get higher weight / 后面的 token 获得更高的权重
-        positions = torch.arange(response_length, dtype=torch.float32)
-        weights = self.reward_decay ** (response_length - 1 - positions)
-
-        # Normalize weights / 归一化权重
-        weights = weights / weights.sum()
-
-        # Distribute reward across tokens / 在 token 间分配奖励
-        per_token_rewards = base_reward * weights
-
-        return per_token_rewards
+        return total_reward, is_correct
 
     def _extract_answer(self, response: str) -> str:
-        """Extract the final answer from model response / 从模型响应中提取最终答案"""
+        """Extract the final answer from model response"""
+        # Try to extract from answer tags or patterns
         if "<answer>" in response and "</answer>" in response:
             start = response.find("<answer>") + len("<answer>")
             end = response.find("</answer>")
             return response[start:end].strip()
 
+        # Try to find after "answer:" keyword
         if "answer:" in response.lower():
             parts = response.lower().split("answer:")
             if len(parts) > 1:
-                return parts[-1].strip().split()[0] if parts[-1].strip() else ""
+                # Get the part after "answer:" and extract first number/word
+                answer_part = parts[-1].strip()
+                # Try to extract integer answer (as per paper's dataset transformation)
+                import re
+                numbers = re.findall(r'-?\d+', answer_part)
+                if numbers:
+                    return numbers[0]
+                # Otherwise return first few words
+                words = answer_part.split()
+                return words[0] if words else ""
 
-        words = response.strip().split()
-        return " ".join(words[-5:]) if words else ""
+        # Fallback: extract last number from response
+        import re
+        numbers = re.findall(r'-?\d+', response)
+        return numbers[-1] if numbers else ""
 
-    def _is_partially_correct(self, predicted: str, correct: str) -> bool:
-        """Check if answer is partially correct / 检查答案是否部分正确"""
-        pred_digits = set(c for c in predicted if c.isdigit() or c == '.')
-        correct_digits = set(c for c in correct if c.isdigit() or c == '.')
+    def _is_equivalent(self, predicted: str, correct: str) -> bool:
+        """Check if predicted answer is equivalent to correct answer"""
+        # Normalize and compare
+        pred_normalized = predicted.lower().strip()
+        correct_normalized = correct.lower().strip()
 
-        if pred_digits and correct_digits:
-            overlap = len(pred_digits & correct_digits) / len(correct_digits)
-            return overlap > 0.5
+        # Direct comparison
+        if pred_normalized == correct_normalized:
+            return True
+
+        # Try numeric comparison for integer answers
+        try:
+            pred_num = float(pred_normalized)
+            correct_num = float(correct_normalized)
+            return abs(pred_num - correct_num) < 1e-6
+        except:
+            pass
+
         return False
+
+    def _compute_length_penalty(self, response: str) -> float:
+        """
+        Compute length-based reward shaping (Overlong Reward Shaping).
+
+        R_length(y) = 0 if |y| ≤ L_max - L_cache
+        R_length(y) = (L_max - L_cache - |y|) / L_cache if in punishment interval
+        R_length(y) = -1 if |y| > L_max
+        """
+        response_length = len(response.split())  # Approximate token count
+
+        L_max = self.config.max_length
+        L_cache = self.config.soft_punish_cache
+
+        if response_length <= L_max - L_cache:
+            return 0.0
+        elif response_length <= L_max:
+            # Soft punishment interval
+            return (L_max - L_cache - response_length) / L_cache
+        else:
+            # Hard punishment
+            return -1.0
 
 
 class DAPOTrainer:
     """
-    DAPO (Dynamic Advantage Policy Optimization) Trainer
-    DAPO (动态优势策略优化) 训练器
+    DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization) Trainer
 
-    Key innovations:
-    1. Token-level loss computation / Token级别损失计算
-    2. Dynamic group size adjustment / 动态组大小调整
-    3. Overlong response filtering / 过长响应过滤
-    4. Reward shaping with per-token decomposition / 带逐token分解的奖励塑形
+    Implements the DAPO algorithm with four key techniques:
+    1. Clip-Higher: Decoupled clipping ranges
+    2. Dynamic Sampling: Filter zero-gradient samples
+    3. Token-Level Loss: Average over tokens not samples
+    4. Overlong Reward Shaping: Length-aware penalties
     """
 
     def __init__(self, config: DAPOConfig):
         self.config = config
         self.device = torch.device(config.device)
 
-        # Current dynamic group size / 当前动态组大小
-        self.current_group_size = config.initial_group_size
-
-        # Load model and tokenizer / 加载模型和分词器
-        logger.info(f"Loading model: {config.model_name} / 加载模型: {config.model_name}")
+        # Load model and tokenizer
+        logger.info(f"Loading model: {config.model_name}")
         self.model = AutoModelForCausalLM.from_pretrained(
             config.model_name,
             torch_dtype=torch.float16 if "cuda" in config.device else torch.float32,
@@ -279,551 +261,475 @@ class DAPOTrainer:
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        # Reference model (frozen copy for KL divergence) / 参考模型(KL散度的冻结副本)
-        logger.info("Creating reference model for KL divergence / 创建参考模型用于KL散度计算")
-        self.ref_model = AutoModelForCausalLM.from_pretrained(
-            config.model_name,
-            torch_dtype=torch.float16 if "cuda" in config.device else torch.float32,
-            device_map="auto"
-        )
-        self.ref_model.eval()
-        for param in self.ref_model.parameters():
-            param.requires_grad = False
+        # Store old policy parameters (for computing importance ratios)
+        self.old_model = None
 
-        # Optimizer / 优化器
+        # Optimizer - using AdamW with constant learning rate
         self.optimizer = torch.optim.AdamW(
             self.model.parameters(),
             lr=config.learning_rate
         )
 
-        # Reward shaper / 奖励塑形器
-        self.reward_shaper = RewardShaper(config)
+        # Reward model
+        self.reward_model = RewardModel(config)
 
-        # Training statistics / 训练统计
+        # Training statistics
         self.stats = {
-            "epoch_losses": [],
-            "epoch_rewards": [],
-            "epoch_kl_divs": [],
-            "epoch_group_sizes": [],
-            "epoch_filtered_ratios": []
+            "step_losses": [],
+            "step_rewards": [],
+            "step_entropies": [],
+            "step_mean_lengths": [],
+            "step_accuracies": []
         }
+
+        self.current_step = 0
+
+    def update_old_policy(self):
+        """Update old policy parameters (π_θ_old ← π_θ)"""
+        # Deep copy current model to old model
+        if self.old_model is None:
+            self.old_model = AutoModelForCausalLM.from_pretrained(
+                self.config.model_name,
+                torch_dtype=torch.float16 if "cuda" in self.config.device else torch.float32,
+                device_map="auto"
+            )
+
+        # Copy parameters
+        self.old_model.load_state_dict(self.model.state_dict())
+        self.old_model.eval()
+
+        # Freeze old model
+        for param in self.old_model.parameters():
+            param.requires_grad = False
 
     def generate_responses(
         self,
         prompt: str,
         num_samples: int
-    ) -> Tuple[List[str], List[int]]:
+    ) -> List[str]:
         """
-        Generate multiple response samples for a given prompt
-        为给定提示生成多个响应样本
+        Generate multiple response samples for a given prompt using old policy.
 
         Args:
-            prompt: Input question / 输入问题
-            num_samples: Number of samples to generate / 要生成的样本数量
+            prompt: Input question/prompt
+            num_samples: Number of samples to generate (G in DAPO formula)
 
         Returns:
-            Tuple of (responses, response_lengths) / (响应列表, 响应长度列表)
+            List of generated responses
         """
         responses = []
-        response_lengths = []
 
-        formatted_prompt = (
-            f"<|im_start|>user\n{prompt}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
+        # Use old policy for generation
+        model_to_use = self.old_model if self.old_model is not None else self.model
+        model_to_use.eval()
 
+        # Format prompt
+        formatted_prompt = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+
+        # Tokenize
         inputs = self.tokenizer(
             formatted_prompt,
             return_tensors="pt",
-            max_length=self.config.max_length,
+            max_length=1024,  # Input prompt length
             truncation=True
         ).to(self.device)
 
+        # Generate multiple samples
         for _ in range(num_samples):
             with torch.no_grad():
-                outputs = self.model.generate(
+                outputs = model_to_use.generate(
                     **inputs,
-                    max_new_tokens=self.config.max_response_length,
+                    max_new_tokens=min(2048, self.config.max_generation_tokens),  # Limit for efficiency
                     temperature=self.config.temperature,
+                    top_p=self.config.top_p,
                     do_sample=True,
                     pad_token_id=self.tokenizer.eos_token_id,
                     num_return_sequences=1
                 )
 
+            # Decode response
             response = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
 
-            # Extract assistant's response / 提取助手响应
+            # Extract assistant's response
             if "<|im_start|>assistant\n" in response:
                 response = response.split("<|im_start|>assistant\n")[-1]
                 if "<|im_end|>" in response:
                     response = response.split("<|im_end|>")[0]
 
-            response = response.strip()
-            responses.append(response)
-            response_lengths.append(len(self.tokenizer.encode(response)))
+            responses.append(response.strip())
 
-        return responses, response_lengths
+        return responses
 
-    def filter_overlong(
+    def dynamic_sample_batch(
         self,
-        responses: List[str],
-        response_lengths: List[int]
-    ) -> Tuple[List[str], List[int], List[bool]]:
+        question: str,
+        correct_answer: str
+    ) -> Tuple[List[str], List[float], List[bool]]:
         """
-        Filter responses that exceed the maximum length threshold
-        过滤超过最大长度阈值的响应
+        Dynamic sampling: Keep sampling until we get samples with 0 < accuracy < 1.
 
-        Overlong Filtering: Only responses with length ≤ L_max participate
-        in advantage computation. Overlong responses receive zero advantage
-        to discourage generating excessively long outputs.
-
-        过长过滤: 只有长度 ≤ L_max 的响应参与优势计算。
-        过长的响应获得零优势以避免生成过长的输出。
-
-        Args:
-            responses: List of generated responses / 生成的响应列表
-            response_lengths: Corresponding response lengths / 对应的响应长度
+        This ensures all samples have effective gradients (non-zero advantages).
 
         Returns:
-            Tuple of (valid_mask, filtered_count) / (有效掩码, 过滤计数)
+            Tuple of (responses, rewards, correctness_list)
         """
-        max_len = self.config.max_response_length
-        valid_mask = [length <= max_len for length in response_lengths]
-        filtered_count = sum(1 for m in valid_mask if not m)
+        attempts = 0
+        max_attempts = self.config.max_sampling_tries
 
-        return valid_mask, filtered_count
+        while attempts < max_attempts:
+            # Generate group of responses
+            responses = self.generate_responses(question, self.config.group_size)
 
-    def compute_dynamic_advantages(
-        self,
-        rewards: List[float],
-        valid_mask: List[bool]
-    ) -> List[float]:
-        """
-        Compute group-normalized advantages using only valid (non-overlong) samples
-        仅使用有效(非过长)样本计算组归一化优势
+            # Compute rewards
+            rewards = []
+            correctness = []
+            for response in responses:
+                reward, is_correct = self.reward_model.compute_reward(
+                    question, response, correct_answer
+                )
+                rewards.append(reward)
+                correctness.append(is_correct)
 
-        Formula / 公式:
-        Â_i = (r_i - mean({r_j : valid_j})) / std({r_j : valid_j})
+            # Check if we have mixed correctness (not all correct, not all incorrect)
+            num_correct = sum(correctness)
 
-        Overlong responses get advantage = 0
-        过长的响应获得优势 = 0
-
-        Args:
-            rewards: List of rewards / 奖励列表
-            valid_mask: Boolean mask for valid responses / 有效响应的布尔掩码
-
-        Returns:
-            List of advantages / 优势列表
-        """
-        valid_rewards = [r for r, m in zip(rewards, valid_mask) if m]
-
-        if len(valid_rewards) == 0:
-            return [0.0] * len(rewards)
-
-        mean_reward = np.mean(valid_rewards)
-        std_reward = np.std(valid_rewards) + 1e-8
-
-        advantages = []
-        for i, (r, m) in enumerate(zip(rewards, valid_mask)):
-            if m:
-                advantages.append((r - mean_reward) / std_reward)
+            if self.config.enable_dynamic_sampling:
+                # Dynamic sampling: reject if all same (gradient would be zero)
+                if 0 < num_correct < len(correctness):
+                    return responses, rewards, correctness
+                attempts += 1
             else:
-                # Overlong responses get zero advantage / 过长响应获得零优势
-                advantages.append(0.0)
+                # No dynamic sampling, accept any batch
+                return responses, rewards, correctness
 
-        return advantages
+        # If we exhausted attempts, return the last batch anyway
+        logger.warning(f"Dynamic sampling: Could not get mixed batch after {max_attempts} attempts")
+        return responses, rewards, correctness
 
-    def adjust_group_size(self, reward_variance: float):
+    def compute_advantages(self, rewards: torch.Tensor) -> torch.Tensor:
         """
-        Dynamically adjust group size based on reward variance
-        根据奖励方差动态调整组大小
+        Compute group-normalized advantages.
 
-        High variance → increase group size for better estimation
-        Low variance → decrease group size for efficiency
-
-        高方差 → 增加组大小以获得更好的估计
-        低方差 → 减少组大小以提高效率
+        Formula: Â_i = (R_i - mean({R_i})) / (std({R_i}) + eps)
 
         Args:
-            reward_variance: Variance of rewards in current batch / 当前批次的奖励方差
+            rewards: Tensor of shape (group_size,) containing rewards
+
+        Returns:
+            Advantages tensor of same shape
         """
-        threshold = self.config.dynamic_sampling_threshold
-
-        if reward_variance > threshold * 2:
-            # High variance: increase group size / 高方差: 增加组大小
-            self.current_group_size = min(
-                self.current_group_size + 2,
-                self.config.max_group_size
-            )
-        elif reward_variance < threshold * 0.5:
-            # Low variance: decrease group size / 低方差: 减少组大小
-            self.current_group_size = max(
-                self.current_group_size - 2,
-                self.config.min_group_size
-            )
-
-        logger.debug(
-            f"Adjusted group size to {self.current_group_size} "
-            f"(variance: {reward_variance:.4f})"
-        )
+        advantages = (rewards - rewards.mean()) / (rewards.std() + 1e-8)
+        return advantages
 
     def compute_token_level_loss(
         self,
-        prompt: str,
-        response: str,
-        advantage: float
-    ) -> Tuple[torch.Tensor, float]:
+        responses: List[str],
+        advantages: torch.Tensor,
+        question: str
+    ) -> Tuple[float, Dict]:
         """
-        Compute token-level policy gradient loss
-        计算 token 级别的策略梯度损失
+        Compute token-level policy gradient loss (key technique #3).
 
-        Token-Level Loss / Token级别损失:
-        L_i = -(1/|o_i|) ∑_{t=1}^{|o_i|} min(
-            r_t(θ) * Â_i,
-            clip(r_t(θ), 1-ε, 1+ε) * Â_i
-        )
-
-        This normalizes by sequence length to prevent bias towards longer outputs.
-        通过序列长度归一化以防止对较长输出的偏差。
-
-        Args:
-            prompt: Input prompt / 输入提示
-            response: Generated response / 生成的响应
-            advantage: Computed advantage / 计算得到的优势
+        Instead of averaging over samples first, we average over all tokens:
+        Loss = (1 / ∑|o_i|) * ∑_i ∑_t loss(o_i,t)
 
         Returns:
-            Tuple of (loss, kl_divergence) / (损失, KL散度)
+            Tuple of (loss_value, statistics_dict)
         """
-        formatted_prompt = (
-            f"<|im_start|>user\n{prompt}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
-        full_text = formatted_prompt + response
+        total_loss = 0.0
+        total_tokens = 0
 
-        inputs = self.tokenizer(
-            full_text,
-            return_tensors="pt",
-            max_length=self.config.max_length,
-            truncation=True
-        ).to(self.device)
+        formatted_prompt = f"<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
 
-        # Forward pass through current policy / 当前策略的前向传播
-        outputs = self.model(**inputs, output_hidden_states=False)
-        logits = outputs.logits[:, :-1, :]  # Remove last position / 移除最后位置
-        labels = inputs["input_ids"][:, 1:]  # Shift labels / 偏移标签
+        for idx, response in enumerate(responses):
+            # Tokenize prompt + response
+            full_text = formatted_prompt + response
+            inputs = self.tokenizer(
+                full_text,
+                return_tensors="pt",
+                max_length=self.config.max_length,
+                truncation=True
+            ).to(self.device)
 
-        # Compute per-token log probabilities / 计算逐token对数概率
-        log_probs = F.log_softmax(logits, dim=-1)
-        per_token_log_probs = log_probs.gather(2, labels.unsqueeze(-1)).squeeze(-1)
+            input_ids = inputs["input_ids"]
+            attention_mask = inputs["attention_mask"]
 
-        # Get reference model log probabilities / 获取参考模型对数概率
-        with torch.no_grad():
-            ref_outputs = self.ref_model(**inputs, output_hidden_states=False)
-            ref_logits = ref_outputs.logits[:, :-1, :]
-            ref_log_probs = F.log_softmax(ref_logits, dim=-1)
-            ref_per_token_log_probs = ref_log_probs.gather(
-                2, labels.unsqueeze(-1)
+            # Get number of tokens in this response
+            response_tokens = input_ids.shape[1]
+
+            # Get log probabilities from current policy
+            outputs_current = self.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                labels=input_ids
+            )
+
+            # Get log probabilities from old policy
+            with torch.no_grad():
+                outputs_old = self.old_model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    labels=input_ids
+                )
+
+            # Compute per-token log probabilities
+            logits_current = outputs_current.logits[:, :-1, :]  # Exclude last token
+            logits_old = outputs_old.logits[:, :-1, :]
+
+            labels = input_ids[:, 1:]  # Shift labels
+
+            # Get log probs for actual tokens
+            log_probs_current = F.log_softmax(logits_current, dim=-1)
+            log_probs_old = F.log_softmax(logits_old, dim=-1)
+
+            # Gather log probs for actual tokens
+            token_log_probs_current = log_probs_current.gather(
+                -1, labels.unsqueeze(-1)
             ).squeeze(-1)
 
-        # Compute ratio per token / 计算逐token比率
-        ratio = torch.exp(per_token_log_probs - ref_per_token_log_probs)
+            token_log_probs_old = log_probs_old.gather(
+                -1, labels.unsqueeze(-1)
+            ).squeeze(-1)
 
-        # Compute clipped objective per token / 计算逐token裁剪目标
-        advantage_tensor = torch.tensor(
-            advantage, device=self.device, dtype=torch.float32
-        )
-        surr1 = ratio * advantage_tensor
-        surr2 = torch.clamp(
-            ratio,
-            1.0 - self.config.clip_epsilon,
-            1.0 + self.config.clip_epsilon
-        ) * advantage_tensor
+            # Compute importance sampling ratios for each token
+            # r_t = π_θ(o_t | q, o_<t) / π_θ_old(o_t | q, o_<t)
+            ratios = torch.exp(token_log_probs_current - token_log_probs_old)
 
-        # Token-level loss: average over all tokens / Token级别损失: 在所有token上平均
-        token_loss = -torch.min(surr1, surr2).mean()
+            # DAPO clipped objective with decoupled clip ranges
+            advantage = advantages[idx]
 
-        # KL divergence per token / 逐token KL散度
-        kl_per_token = (
-            torch.exp(ref_per_token_log_probs - per_token_log_probs)
-            - (ref_per_token_log_probs - per_token_log_probs)
-            - 1
-        )
-        kl_div = kl_per_token.mean().item()
+            surr1 = ratios * advantage
+            surr2 = torch.clamp(
+                ratios,
+                1.0 - self.config.clip_epsilon_low,
+                1.0 + self.config.clip_epsilon_high  # Clip-Higher!
+            ) * advantage
 
-        return token_loss, kl_div
+            # Token-level loss (negative for maximization)
+            token_losses = -torch.min(surr1, surr2)
 
-    def compute_sequence_level_loss(
-        self,
-        prompt: str,
-        response: str,
-        advantage: float
-    ) -> Tuple[torch.Tensor, float]:
-        """
-        Compute sequence-level loss (fallback mode, similar to GRPO)
-        计算序列级别损失(回退模式, 类似 GRPO)
+            # Sum over tokens (not average per sample)
+            sample_loss = token_losses.sum()
 
-        Args:
-            prompt: Input prompt / 输入提示
-            response: Generated response / 生成的响应
-            advantage: Computed advantage / 计算得到的优势
+            total_loss += sample_loss.item()
+            total_tokens += response_tokens
 
-        Returns:
-            Tuple of (loss, kl_divergence) / (损失, KL散度)
-        """
-        formatted_prompt = (
-            f"<|im_start|>user\n{prompt}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
-        full_text = formatted_prompt + response
+        # Average over all tokens across all samples
+        avg_loss = total_loss / max(total_tokens, 1)
 
-        inputs = self.tokenizer(
-            full_text,
-            return_tensors="pt",
-            max_length=self.config.max_length,
-            truncation=True
-        ).to(self.device)
+        stats = {
+            "total_tokens": total_tokens,
+            "avg_tokens_per_sample": total_tokens / len(responses)
+        }
 
-        # Current policy log prob / 当前策略对数概率
-        outputs = self.model(**inputs, labels=inputs["input_ids"])
-        log_prob_current = -outputs.loss
-
-        # Reference policy log prob / 参考策略对数概率
-        with torch.no_grad():
-            ref_outputs = self.ref_model(**inputs, labels=inputs["input_ids"])
-            log_prob_ref = -ref_outputs.loss
-
-        # Ratio and clipped objective / 比率和裁剪目标
-        ratio = torch.exp(log_prob_current - log_prob_ref)
-        advantage_tensor = torch.tensor(
-            advantage, device=self.device, dtype=torch.float32
-        )
-
-        surr1 = ratio * advantage_tensor
-        surr2 = torch.clamp(
-            ratio,
-            1.0 - self.config.clip_epsilon,
-            1.0 + self.config.clip_epsilon
-        ) * advantage_tensor
-
-        policy_loss = -torch.min(surr1, surr2)
-
-        # KL divergence / KL散度
-        kl_ratio = torch.exp(log_prob_ref - log_prob_current)
-        kl_div = (kl_ratio - (log_prob_ref - log_prob_current) - 1).item()
-
-        return policy_loss, kl_div
+        return avg_loss, stats
 
     def train_step(
         self,
         question: str,
-        correct_answer: str,
-        reasoning_steps: List[str]
+        correct_answer: str
     ) -> Dict[str, float]:
         """
-        Perform one DAPO training step on a single question
-        对单个问题执行一步 DAPO 训练
+        Perform one DAPO training step on a single question.
 
-        Pipeline / 流程:
-        1. Generate G responses (dynamic group size)
-           生成 G 个响应(动态组大小)
-        2. Filter overlong responses
-           过滤过长响应
-        3. Compute rewards for valid responses
-           计算有效响应的奖励
-        4. Compute dynamic advantages
-           计算动态优势
-        5. Compute token-level or sequence-level loss
-           计算 token 级别或序列级别损失
-        6. Update policy with gradient
-           使用梯度更新策略
-
-        Args:
-            question: Input question / 输入问题
-            correct_answer: Ground truth answer / 正确答案
-            reasoning_steps: Reference reasoning steps / 参考推理步骤
+        Algorithm 1 from paper:
+        1. Update old policy π_θ_old ← π_θ
+        2. Sample G outputs {o_i} ~ π_θ_old(·|q)
+        3. Compute rewards {r_i}
+        4. Filter out samples (Dynamic Sampling)
+        5. Compute advantages Â_i,t
+        6. Update policy by maximizing DAPO objective
 
         Returns:
-            Dictionary of training statistics / 训练统计字典
+            Dictionary containing step statistics
         """
-        G = self.current_group_size
+        # Step 1: Update old policy
+        self.update_old_policy()
 
-        # Step 1: Generate responses / 步骤1: 生成响应
-        responses, response_lengths = self.generate_responses(question, G)
-
-        # Step 2: Filter overlong responses / 步骤2: 过滤过长响应
-        valid_mask, filtered_count = self.filter_overlong(
-            responses, response_lengths
+        # Steps 2-4: Dynamic sampling
+        responses, rewards, correctness = self.dynamic_sample_batch(
+            question, correct_answer
         )
 
-        # Step 3: Compute rewards / 步骤3: 计算奖励
-        rewards = []
-        for response in responses:
-            reward = self.reward_shaper.compute_base_reward(
-                question, response, correct_answer
-            )
-            rewards.append(reward)
+        if not responses:
+            logger.warning("No valid responses generated, skipping step")
+            return {"loss": 0.0, "avg_reward": 0.0, "accuracy": 0.0}
 
-        # Step 4: Compute advantages / 步骤4: 计算优势
-        advantages = self.compute_dynamic_advantages(rewards, valid_mask)
+        rewards_tensor = torch.tensor(rewards, device=self.device, dtype=torch.float32)
 
-        # Step 5 & 6: Compute loss and update / 步骤5和6: 计算损失并更新
-        total_loss = 0.0
-        total_kl = 0.0
-        num_valid = sum(valid_mask)
+        # Step 5: Compute advantages
+        advantages = self.compute_advantages(rewards_tensor)
 
-        if num_valid > 0:
-            for idx, (response, advantage, is_valid) in enumerate(
-                zip(responses, advantages, valid_mask)
-            ):
-                if not is_valid:
-                    continue
+        # Step 6: Compute loss and update
+        self.model.train()
 
-                # Choose loss computation mode / 选择损失计算模式
-                if self.config.use_token_level_loss:
-                    loss, kl = self.compute_token_level_loss(
-                        question, response, advantage
-                    )
-                else:
-                    loss, kl = self.compute_sequence_level_loss(
-                        question, response, advantage
-                    )
+        loss_value, loss_stats = self.compute_token_level_loss(
+            responses, advantages, question
+        )
 
-                total_loss += loss.item() + self.config.beta * kl
-                total_kl += kl
+        # Backpropagation
+        self.optimizer.zero_grad()
+        loss_tensor = torch.tensor(loss_value, device=self.device, requires_grad=True)
+        loss_tensor.backward()
 
-            # Average over valid samples / 在有效样本上平均
-            avg_loss = total_loss / num_valid
-            avg_kl = total_kl / num_valid
+        # Gradient clipping
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
 
-            # Backpropagation / 反向传播
-            self.optimizer.zero_grad()
-            torch.tensor(avg_loss, requires_grad=True).backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-            self.optimizer.step()
-        else:
-            avg_loss = 0.0
-            avg_kl = 0.0
+        self.optimizer.step()
 
-        # Dynamic group size adjustment / 动态组大小调整
-        valid_rewards = [r for r, m in zip(rewards, valid_mask) if m]
-        if len(valid_rewards) > 1:
-            reward_variance = np.var(valid_rewards)
-            self.adjust_group_size(reward_variance)
+        # Compute statistics
+        accuracy = sum(correctness) / len(correctness)
+        avg_length = np.mean([len(r.split()) for r in responses])
+
+        # Compute entropy (diversity metric)
+        entropy = self._compute_entropy(responses)
 
         return {
-            "loss": avg_loss,
-            "avg_reward": np.mean(valid_rewards) if valid_rewards else 0.0,
-            "kl_divergence": avg_kl,
-            "group_size": G,
-            "filtered_ratio": filtered_count / G if G > 0 else 0.0
+            "loss": loss_value,
+            "avg_reward": rewards_tensor.mean().item(),
+            "max_reward": rewards_tensor.max().item(),
+            "min_reward": rewards_tensor.min().item(),
+            "accuracy": accuracy,
+            "avg_length": avg_length,
+            "entropy": entropy,
+            "num_samples": len(responses),
+            **loss_stats
         }
+
+    def _compute_entropy(self, responses: List[str]) -> float:
+        """Compute entropy of response distribution (diversity metric)"""
+        # Simple heuristic: unique responses ratio
+        unique_responses = len(set(responses))
+        total_responses = len(responses)
+        return unique_responses / total_responses if total_responses > 0 else 0.0
 
     def train(self, dataset: List[Dict]):
         """
-        Train using DAPO algorithm
-        使用 DAPO 算法训练
+        Train the model using DAPO algorithm.
 
         Args:
-            dataset: Training dataset / 训练数据集
+            dataset: List of training examples, each containing:
+                     - question: str
+                     - correct_answer: str
         """
         logger.info(f"Starting DAPO training with {len(dataset)} examples")
-        logger.info(f"Initial group size: {self.config.initial_group_size}")
-        logger.info(f"Clip epsilon: {self.config.clip_epsilon}")
-        logger.info(f"Beta (KL coef): {self.config.beta}")
-        logger.info(f"Max response length: {self.config.max_response_length}")
-        logger.info(f"Token-level loss: {self.config.use_token_level_loss}")
-
-        self.model.train()
+        logger.info(f"Group size: {self.config.group_size}")
+        logger.info(f"Clip epsilon (low, high): ({self.config.clip_epsilon_low}, {self.config.clip_epsilon_high})")
+        logger.info(f"Dynamic sampling: {self.config.enable_dynamic_sampling}")
+        logger.info(f"Token-level loss: Enabled")
+        logger.info(f"Overlong reward shaping: Enabled")
 
         for epoch in range(self.config.max_epochs):
-            logger.info(f"\n{'='*50}")
+            logger.info(f"\n{'='*60}")
             logger.info(f"Epoch {epoch + 1}/{self.config.max_epochs}")
-            logger.info(f"{'='*50}")
+            logger.info(f"{'='*60}")
 
-            epoch_losses = []
-            epoch_rewards = []
-            epoch_kls = []
-            epoch_group_sizes = []
-            epoch_filtered_ratios = []
+            epoch_stats = {
+                "losses": [],
+                "rewards": [],
+                "accuracies": [],
+                "lengths": [],
+                "entropies": []
+            }
 
+            # Training loop
             for idx, example in enumerate(tqdm(dataset, desc=f"Epoch {epoch+1}")):
                 stats = self.train_step(
                     question=example["question"],
-                    correct_answer=example["correct_answer"],
-                    reasoning_steps=example.get("reasoning_steps", [])
+                    correct_answer=example["correct_answer"]
                 )
 
-                epoch_losses.append(stats["loss"])
-                epoch_rewards.append(stats["avg_reward"])
-                epoch_kls.append(stats["kl_divergence"])
-                epoch_group_sizes.append(stats["group_size"])
-                epoch_filtered_ratios.append(stats["filtered_ratio"])
+                # Record statistics
+                epoch_stats["losses"].append(stats["loss"])
+                epoch_stats["rewards"].append(stats["avg_reward"])
+                epoch_stats["accuracies"].append(stats["accuracy"])
+                epoch_stats["lengths"].append(stats["avg_length"])
+                epoch_stats["entropies"].append(stats["entropy"])
 
+                self.stats["step_losses"].append(stats["loss"])
+                self.stats["step_rewards"].append(stats["avg_reward"])
+                self.stats["step_accuracies"].append(stats["accuracy"])
+                self.stats["step_mean_lengths"].append(stats["avg_length"])
+                self.stats["step_entropies"].append(stats["entropy"])
+
+                self.current_step += 1
+
+                # Log every 10 steps
                 if (idx + 1) % 10 == 0:
                     logger.info(
-                        f"Step {idx+1}: Loss={stats['loss']:.4f}, "
+                        f"Step {self.current_step}: "
+                        f"Loss={stats['loss']:.4f}, "
                         f"Reward={stats['avg_reward']:.4f}, "
-                        f"KL={stats['kl_divergence']:.4f}, "
-                        f"G={stats['group_size']}, "
-                        f"Filtered={stats['filtered_ratio']:.2%}"
+                        f"Acc={stats['accuracy']:.2%}, "
+                        f"Length={stats['avg_length']:.0f}, "
+                        f"Entropy={stats['entropy']:.4f}"
                     )
 
-            # Epoch summary / Epoch 总结
-            self.stats["epoch_losses"].append(np.mean(epoch_losses))
-            self.stats["epoch_rewards"].append(np.mean(epoch_rewards))
-            self.stats["epoch_kl_divs"].append(np.mean(epoch_kls))
-            self.stats["epoch_group_sizes"].append(np.mean(epoch_group_sizes))
-            self.stats["epoch_filtered_ratios"].append(np.mean(epoch_filtered_ratios))
-
+            # Epoch summary
             logger.info(f"\nEpoch {epoch+1} Summary:")
-            logger.info(f"  Average Loss: {np.mean(epoch_losses):.4f}")
-            logger.info(f"  Average Reward: {np.mean(epoch_rewards):.4f}")
-            logger.info(f"  Average KL: {np.mean(epoch_kls):.4f}")
-            logger.info(f"  Average Group Size: {np.mean(epoch_group_sizes):.1f}")
-            logger.info(f"  Average Filtered Ratio: {np.mean(epoch_filtered_ratios):.2%}")
+            logger.info(f"  Average Loss: {np.mean(epoch_stats['losses']):.4f}")
+            logger.info(f"  Average Reward: {np.mean(epoch_stats['rewards']):.4f}")
+            logger.info(f"  Average Accuracy: {np.mean(epoch_stats['accuracies']):.2%}")
+            logger.info(f"  Average Length: {np.mean(epoch_stats['lengths']):.0f}")
+            logger.info(f"  Average Entropy: {np.mean(epoch_stats['entropies']):.4f}")
 
+            # Save checkpoint
             self.save_checkpoint(epoch)
 
-        logger.info("\nDAPO Training completed!")
+        logger.info("\nTraining completed!")
         self.save_final_model()
 
     def save_checkpoint(self, epoch: int):
-        """Save model checkpoint / 保存模型检查点"""
+        """Save model checkpoint"""
         checkpoint_dir = f"{self.config.output_dir}/epoch_{epoch+1}"
         os.makedirs(checkpoint_dir, exist_ok=True)
 
         self.model.save_pretrained(checkpoint_dir)
         self.tokenizer.save_pretrained(checkpoint_dir)
 
-        with open(f"{checkpoint_dir}/stats.json", "w") as f:
-            json.dump(self.stats, f, indent=2)
+        # Save training stats
+        with open(f"{checkpoint_dir}/stats.json", "w", encoding="utf-8") as f:
+            json.dump(self.stats, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Checkpoint saved to {checkpoint_dir}")
 
     def save_final_model(self):
-        """Save final trained model / 保存最终训练模型"""
+        """Save final trained model"""
         final_dir = f"{self.config.output_dir}/final"
         os.makedirs(final_dir, exist_ok=True)
 
         self.model.save_pretrained(final_dir)
         self.tokenizer.save_pretrained(final_dir)
 
-        with open(f"{final_dir}/training_stats.json", "w") as f:
-            json.dump(self.stats, f, indent=2)
+        # Save final stats
+        with open(f"{final_dir}/training_stats.json", "w", encoding="utf-8") as f:
+            json.dump(self.stats, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Final model saved to {final_dir}")
 
 
 def main():
-    """Main training function / 主训练函数"""
+    """Main training function"""
+    # Load configuration
     config = DAPOConfig()
 
-    with open("data/sample_reasoning_data.json", "r") as f:
+    # Load training data
+    data_path = "data/sample_reasoning_data.json"
+    if not os.path.exists(data_path):
+        logger.error(f"Training data not found at {data_path}")
+        logger.info("Please prepare training data with format:")
+        logger.info('[{"question": "...", "correct_answer": "..."}, ...]')
+        return
+
+    with open(data_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
 
     logger.info(f"Loaded {len(dataset)} training examples")
 
+    # Initialize trainer
     trainer = DAPOTrainer(config)
+
+    # Start training
     trainer.train(dataset)
 
 
