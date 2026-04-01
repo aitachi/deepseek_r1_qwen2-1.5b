@@ -98,8 +98,8 @@
 
 ### 步骤 1: 克隆仓库
 ```bash
-git clone https://github.com/aitachi/fast-socialfi.git
-cd fast-socialfi
+git clone https://github.com/aitachi/deepseek_r1_qwen2-1.5b.git
+cd deepseek_r1_qwen2-1.5b
 ```
 
 ### 步骤 2: 安装依赖
@@ -398,7 +398,7 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
   author = {Aitachi},
   title = {GRPO, PPO, and DPO: Complete Algorithm Implementation and Comparison},
   year = {2025},
-  url = {https://github.com/aitachi/fast-socialfi},
+  url = {https://github.com/aitachi/deepseek_r1_qwen2-1.5b},
   email = {44158892@qq.com}
 }
 ```

@@ -166,7 +166,7 @@ run_comparison.py
 
 **作者:** Aitachi
 **邮箱:** 44158892@qq.com
-**GitHub:** https://github.com/aitachi/fast-socialfi
+**GitHub:** https://github.com/aitachi/deepseek_r1_qwen2-1.5b
 
 ---
 
