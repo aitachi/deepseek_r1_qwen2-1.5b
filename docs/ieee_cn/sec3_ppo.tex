@@ -1,0 +1,67 @@
+% 中文版 Section 3: PPO
+\section{近端策略优化（PPO）}
+\label{sec:ppo}
+
+\subsection{算法概述与动机}
+
+PPO~\cite{schulman2017ppo}由Schulman等人于2017年提出，至今仍是LLM对齐中应用最广泛的RL算法。它是InstructGPT~\cite{ouyang2022instructgpt}和早期ChatGPT版本的核心算法。PPO在策略梯度框架基础上引入裁剪代理目标，将策略更新约束在信赖域内，在保持样本效率的同时防止破坏性的大幅更新。
+
+PPO的核心思想在于：原始策略梯度方法存在高方差和更新不稳定的问题。信赖域策略优化（TRPO）通过硬KL约束解决了这一问题，但其二阶优化的计算代价高昂。PPO通过裁剪概率比率，用一阶优化实现了类似的稳定性。
+
+\subsection{裁剪代理目标}
+
+PPO的核心是裁剪代理函数。设$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$表示当前策略与旧策略的概率比率。裁剪目标为：
+\begin{equation}
+L^{\text{CLIP}}(\theta) = \E_t\!\left[\min\!\left(r_t(\theta)\hat{A}_t,\ \text{clip}(r_t(\theta), 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_t\right)\right]
+\label{eq:ppo_clip}
+\end{equation}
+其中$\varepsilon$为超参数（通常取0.2），控制裁剪范围。
+
+\textbf{直观解释：}当优势$\hat{A}_t > 0$（动作优于预期）时，目标鼓励增大$r_t$但在$1 + \varepsilon$处裁剪，防止策略更新过大。当$\hat{A}_t < 0$时，抑制该动作但在$1 - \varepsilon$处裁剪。这创建了目标函数中的一个``平坦''区域，为防止灾难性的大幅更新提供了鲁棒性。
+
+\subsection{价值函数与熵奖励}
+
+PPO维护一个独立的价值网络$V_\phi(s)$来估计期望回报。价值函数损失使用均方误差目标：
+\begin{equation}
+L^{VF}(\phi) = \E_t\left[\left(V_\phi(s_t) - \hat{V}_t^{\text{targ}}\right)^2\right]
+\end{equation}
+
+为鼓励探索和防止过早收敛到确定性策略，PPO添加熵奖励：
+\begin{equation}
+S[\pi_\theta](s_t) = -\sum_{a} \pi_\theta(a|s_t)\log\pi_\theta(a|s_t)
+\end{equation}
+
+\subsection{组合PPO目标}
+
+完整的PPO目标结合了三个组件：
+\begin{equation}
+\boxed{L^{\text{PPO}}(\theta, \phi) = \E_t\left[L^{\text{CLIP}}(\theta) - c_1 L^{VF}(\phi) + c_2 S[\pi_\theta]\right]}
+\label{eq:ppo}
+\end{equation}
+其中$c_1 = 0.5$和$c_2 = 0.01$为典型系数值。期望对当前策略收集的一批轨迹取平均。
+
+\subsection{广义优势估计（GAE）}
+
+优势函数$\hat{A}_t$使用GAE~\cite{schulman2016gae}进行估计，通过参数$\lambda$控制偏差-方差权衡：
+\begin{equation}
+\hat{A}_t^{\text{GAE}} = \sum_{l=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^{V}
+\end{equation}
+其中$\delta_t^{V} = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)$为时序差分（TD）误差。当$\lambda = 0$时，GAE退化为单步TD误差（低方差、高偏差）；当$\lambda = 1$时，退化为蒙特卡洛回报（低偏差、高方差）。
+
+\subsection{架构需求}
+
+PPO需要\textbf{四个模型组件}同时加载到GPU内存中：
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item \textbf{Actor}（策略$\pi_\theta$）：正在训练的LLM。
+\item \textbf{Critic}（价值$V_\phi$）：与Actor规模相当的独立网络。
+\item \textbf{参考模型}（$\pi_{\text{ref}}$）：冻结副本，用于KL计算（RLHF中常见）。
+\item \textbf{奖励模型}（$r_\psi$）：训练好的奖励函数。
+\end{enumerate}
+
+这使得PPO成为内存需求最高的算法，约为单LLM前向传播的$4\times$。对于70亿参数模型，通常需要4--8块A100 GPU配合模型并行。
+
+\subsection{优势与局限}
+
+\textbf{优势：}收敛性质已被充分研究；对超参数选择鲁棒；兼容任意奖励函数；具有策略梯度理论的坚实理论基础。
+
+\textbf{局限：}价值网络带来高内存开销；奖励信号稀疏或含噪时训练不稳定；需要仔细的奖励模型训练；价值网络增加了显著的工程复杂度。

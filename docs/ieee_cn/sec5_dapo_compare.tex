@@ -1,0 +1,187 @@
+% 中文版 Section 5: DAPO + 对比分析
+\section{动态优势策略优化（DAPO）}
+\label{sec:dapo}
+
+DAPO~\cite{yu2025dapo}由Yu等人（字节跳动）于2025年提出，通过三项针对性创新扩展GRPO，解决了其最显著的局限。DAPO在AIME 2024上达到50\%的准确率——较朴素GRPO（30\%）实现67\%的相对提升——使用相同的基础模型（Qwen2.5-32B）。
+
+\subsection{创新1：非对称Clip-Higher}
+
+\subsubsection{GRPO中的熵坍塌问题}
+
+在GRPO中，对称裁剪$\text{clip}(r_t, 1{-}\varepsilon, 1{+}\varepsilon)$（$\varepsilon = 0.2$）对策略熵产生了不对称约束：下界$1 - \varepsilon$强烈抑制词元概率（低至$0.8\times$），而上界$1 + \varepsilon$限制概率增长（最高$1.2\times$）。在多次训练迭代中，这种不对称性导致策略逐步将概率质量集中在少数词元上，引发\textbf{熵坍塌}。
+
+\subsubsection{DAPO的非对称解决方案}
+
+DAPO引入更高的上裁剪边界，允许低概率词元有更大的概率增长空间：
+\begin{equation}
+\text{clip}(r_t,\ 1{-}\varepsilon_{\text{low}},\ 1{+}\varepsilon_{\text{high}}), \quad \varepsilon_{\text{low}}=0.2,\ \varepsilon_{\text{high}}=0.28
+\label{eq:clip_higher}
+\end{equation}
+
+上界扩大40\%（$0.28$ vs $0.20$）使具有正优势的词元能够更积极地提升概率。这促进了探索，防止策略在长时间训练中变得过于确定性。如图\ref{fig:clip_higher}所示，非对称裁剪在整个训练过程中维持更高的策略熵。
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig4_clip_higher.png}
+\caption{对称裁剪（GRPO）与非对称裁剪（DAPO）的比较。DAPO更宽的上界（蓝色）在训练步数中维持更高的熵并防止概率坍塌，而GRPO（橙色）出现熵下降。}
+\label{fig:clip_higher}
+\end{figure}
+
+\subsection{创新2：动态采样与过长过滤}
+
+\subsubsection{零梯度问题}
+
+当某个提示词的$G$个响应全部正确或全部错误时，组优势变为：
+\begin{itemize}[leftmargin=*, itemsep=0pt]
+\item 全部正确：$\hat{A}_i = 0 / \sigma_G = 0$（无学习信号进一步提升）
+\item 全部错误：$\hat{A}_i = 0 / \sigma_G = 0$（无法从失败中学习）
+\end{itemize}
+两种情况都产生零有效梯度，浪费了计算资源。
+
+\subsubsection{DAPO的动态过滤}
+
+DAPO确保每个训练批次同时包含正确和错误的响应：
+\begin{equation}
+\text{过滤条件：} \quad 0 < |\{o_i : \text{is\_correct}(o_i)\}| < G
+\label{eq:dynamic}
+\end{equation}
+所有响应都正确（太简单）或都错误（太难）的提示词被过滤并替换。这保证了每个训练批次都有非零优势和有效梯度更新。
+
+\subsection{创新3：Token级损失归一化}
+
+\subsubsection{样本级归一化中的长度偏差}
+
+GRPO按样本数$\frac{1}{G}\sum_{i=1}^{G}$归一化损失，意味着每个样本对梯度贡献相等。因此，短响应（对梯度贡献的词元更少）具有不成比例的每词元梯度幅度，而长响应被低估。这产生了偏向生成较短输出的隐式偏差。
+
+\subsubsection{DAPO的Token级归一化}
+
+DAPO按组内所有响应的总词元数归一化：
+\begin{equation}
+\boxed{
+\begin{aligned}
+J_{\text{DAPO}}(\theta) &= \E\!\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|} \ell_{i,t}\right] \\
+\ell_{i,t} &= \min\!\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1{-}\varepsilon_{\text{low}}, 1{+}\varepsilon_{\text{high}})\hat{A}_i\right)
+\end{aligned}
+}
+\label{eq:dapo}
+\end{equation}
+
+这确保每个词元对梯度的贡献相等，消除长度偏差。图\ref{fig:token_sample}展示了两种归一化方案的差异。
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig5_token_sample.png}
+\caption{样本级归一化（GRPO）与Token级归一化（DAPO）的比较。Token级归一化为每个词元分配相等权重，消除了样本级归一化中偏向较短响应的隐式偏差。}
+\label{fig:token_sample}
+\end{figure}
+
+\subsection{过长奖励整形}
+
+对于超过最大上下文长度的过长响应，DAPO施加平滑惩罚：
+\begin{equation}
+R_{\text{length}}(y) = \begin{cases}
+0 & |y| \leq L_{\max} - L_{\text{cache}} \\
+\frac{L_{\max} - L_{\text{cache}} - |y|}{L_{\text{cache}}} & L_{\max} - L_{\text{cache}} < |y| \leq L_{\max} \\
+-1 & |y| > L_{\max}
+\end{cases}
+\label{eq:overlong}
+\end{equation}
+其中$L_{\text{cache}}$为缓冲区长度。这种平滑过渡防止了可能破坏训练稳定性的突变奖励变化。效果如图\ref{fig:overlong}所示。
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig6_overlong.png}
+\caption{DAPO的过长奖励整形函数。正常长度范围内的响应不受惩罚。在缓冲区$[L_{\max} - L_{\text{cache}}, L_{\max}]$内施加线性惩罚，超过$L_{\max}$的响应获得最大惩罚$-1$。}
+\label{fig:overlong}
+\end{figure}
+
+\subsection{完整DAPO目标}
+
+综合所有创新，DAPO移除了GRPO中的KL惩罚（改用Clip-Higher机制保证稳定性），使用Token级归一化和动态采样：
+\begin{equation}
+\max_\theta J_{\text{DAPO}}(\theta) \quad \text{s.t.} \quad 0 < \sum_{i=1}^{G}\mathbb{1}[\text{correct}(o_i)] < G
+\label{eq:dapo_full}
+\end{equation}
+
+%=============================================================
+\section{对比分析}
+\label{sec:compare}
+
+\subsection{架构对比}
+
+表\ref{tab:arch}从11个关键架构维度全面对比了四种算法。最显著的差异在于价值网络需求（仅PPO需要）、裁剪策略（对称vs非对称）和损失粒度（样本级vs词元级）。
+
+\begin{table*}[ht]
+\centering
+\caption{PPO、DPO、GRPO和DAPO的全面架构对比}
+\label{tab:arch}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{维度} & \textbf{PPO} & \textbf{DPO} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+提出年份 & 2017 & 2023 & 2025 & 2025 \\
+价值网络 & \cmark{} 需要 & \xmark{} 不需要 & \xmark{} 不需要 & \xmark{} 不需要 \\
+奖励模型 & \cmark{} 显式RM & \xmark{} 隐式 & \cmark{} 规则型 & \cmark{} 规则型 \\
+参考模型 & \xmark{} 可选 & \cmark{} 需要 & \cmark{} 需要 & \cmark{} 需要 \\
+裁剪策略 & 对称 & 无 & 对称 & \textbf{非对称} \\
+裁剪范围 & $[0.8, 1.2]$ & N/A & $[0.8, 1.2]$ & $[\mathbf{0.8, 1.28}]$ \\
+损失粒度 & 词元级 & 序列级 & 样本级 & \textbf{词元级} \\
+组采样 & 否 & 否 & 是（固定$G{=}16$） & 是（动态） \\
+KL约束 & 无 & 通过$\beta$隐式 & 显式惩罚 & \textbf{移除} \\
+训练数据 & 在线采样 & 离线偏好 & 在线采样 & 在线采样 \\
+相对GPU内存 & $\sim$2.0$\times$ & $\sim$1.0$\times$ & $\sim$1.0$\times$ & $\sim$1.2$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{关键技术差异：GRPO vs.\ DAPO}
+
+由于DAPO是GRPO的直接扩展，表\ref{tab:tech}隔离了导致DAPO性能优异的四个关键差异。
+
+\begin{table}[ht]
+\centering
+\caption{GRPO与DAPO的关键技术差异}
+\label{tab:tech}
+\begin{tabular}{p{2cm}p{2.5cm}p{2.5cm}}
+\toprule
+\textbf{维度} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+裁剪范围 & $[1{-}\varepsilon,\ 1{+}\varepsilon]$ 对称 & $[1{-}\varepsilon_l,\ 1{+}\varepsilon_h]$ 非对称 \\
+损失归一化 & $\frac{1}{G}\sum_i$（样本级） & $\frac{1}{\sum_i |o_i|}\sum_i\sum_t$（词元级） \\
+批次过滤 & 无（固定$G{=}16$） & 动态（$0 < \text{correct} < G$） \\
+KL惩罚 & $\beta D_{\text{KL}}$（显式） & 移除（Clip-Higher已足够） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{演进轨迹}
+
+四种算法代表了LLM训练中的清晰演进轨迹：
+
+\textbf{PPO $\to$ DPO：}通过从偏好数据推导闭式损失消除了奖励模型，以在线探索能力换取训练简洁性。
+
+\textbf{PPO $\to$ GRPO：}通过使用组级奖励统计作为优势基线消除了价值网络，内存减少$\sim$50\%并简化了架构。
+
+\textbf{GRPO $\to$ DAPO：}解决了熵坍塌（Clip-Higher）、样本效率（动态采样）和长度偏差（Token级损失），在AIME上实现67\%的相对提升。
+
+\subsection{多维性能对比}
+
+图\ref{fig:radar}展示了8维雷达图，从训练稳定性、内存效率、样本效率、最终精度、实现难度、探索能力、可扩展性和数据需求等方面对比各算法。
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig7_radar.png}
+\caption{多维性能对比。每个轴代表一个关键指标，评分范围0--10。DAPO在精度和样本效率驱动下获得最高总分，GRPO在内存效率方面领先，DPO在实现简易度方面表现突出。}
+\label{fig:radar}
+\end{figure}
+
+\subsection{3D性能景观}
+
+图\ref{fig:3d_surface}可视化了四种算法在GPU内存、训练时间和最终精度之间的三维权衡。DAPO占据了高精度、中等资源需求的有利区域。
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig8_3d_surface.png}
+\caption{3D性能景观，展示GPU内存消耗、训练挂钟时间和最终模型精度之间的权衡。PPO（红色）资源需求最高；DAPO（紫色）精度最高；GRPO（绿色）内存效率最佳。}
+\label{fig:3d_surface}
+\end{figure}
