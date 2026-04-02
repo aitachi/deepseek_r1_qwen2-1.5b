@@ -172,7 +172,7 @@ $$L^{\text{CLIP}}(\theta) = \mathbb{E}_t\left[\min\left(r_t(\theta)\hat{A}_t,\ \
 
 #### 组合 PPO 目标
 
-$$\boxed{L^{\text{PPO}}(\theta, \phi) = \mathbb{E}_t\left[L^{\text{CLIP}}(\theta) - c_1 L^{VF}(\phi) + c_2 S[\pi_\theta]\right]}$$
+$$L^{\text{PPO}}(\theta, \phi) = \mathbb{E}_t\left[L^{\text{CLIP}}(\theta) - c_1 L^{VF}(\phi) + c_2 S[\pi_\theta]\right]$$
 
 其中 $c_1 = 0.5$（价值损失系数），$c_2 = 0.01$（熵奖励系数）。
 
@@ -211,7 +211,9 @@ $$\pi^*(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\left(\frac{1}{\beta}r(x,y
 
 #### DPO 损失函数
 
-$$\boxed{\begin{aligned} L^{\text{DPO}}(\theta) &= -\mathbb{E}_{(x,y_w,y_l)}\left[\log\sigma\left(\beta \cdot h(y_w,y_l,x)\right)\right] \\ h(y_w,y_l,x) &= \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)} \end{aligned}}$$
+$$L^{\text{DPO}}(\theta) = -\mathbb{E}_{(x,y_w,y_l)}\left[\log\sigma\left(\beta \cdot h(y_w,y_l,x)\right)\right]$$
+
+$$h(y_w,y_l,x) = \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}$$
 
 > 其中 $y_w, y_l$ 分别为偏好对中的优选和拒绝响应。$\sigma$ 为 Sigmoid 函数，$\beta$ 控制区分偏好的锐度。
 
@@ -239,7 +241,7 @@ $$\hat{A}_i = \frac{R_i - \mu_G}{\sigma_G + \epsilon}, \quad \mu_G = \frac{1}{G}
 
 #### GRPO 目标函数
 
-$$\boxed{\begin{aligned} J_{\text{GRPO}}(\theta) &= \mathbb{E}_{q \sim \mathcal{D}}\left[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t})\hat{A}_i\right) - \beta D_{\text{KL}}\right] \end{aligned}}$$
+$$J_{\text{GRPO}}(\theta) = \mathbb{E}_{q \sim \mathcal{D}}\left[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_i\right) - \beta D_{\text{KL}}\right]$$
 
 KL 散度使用无偏估计器：
 
@@ -279,7 +281,9 @@ $$\text{过滤条件：} \quad 0 < |\{o_i : \text{is\_correct}(o_i)\}| < G$$
 
 GRPO 的样本级归一化 $\frac{1}{G}\sum_i$ 偏向短响应。DAPO 按总词元数归一化：
 
-$$\boxed{\begin{aligned} J_{\text{DAPO}}(\theta) &= \mathbb{E}\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|} \ell_{i,t}\right] \\ \ell_{i,t} &= \min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1-\varepsilon_{\text{low}}, 1+\varepsilon_{\text{high}})\hat{A}_i\right) \end{aligned}}$$
+$$J_{\text{DAPO}}(\theta) = \mathbb{E}\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|} \ell_{i,t}\right]$$
+
+$$\ell_{i,t} = \min\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1-\varepsilon_{\text{low}}, 1+\varepsilon_{\text{high}})\hat{A}_i\right)$$
 
 > 每个词元对梯度贡献相等，消除长度偏差。
 
