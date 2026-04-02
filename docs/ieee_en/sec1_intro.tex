@@ -1,0 +1,35 @@
+% Section 1: Introduction
+\begin{abstract}
+Reinforcement learning (RL) has become a cornerstone technique for aligning and enhancing large language models (LLMs). This survey provides a comprehensive and systematic analysis of four prominent RL algorithms used in LLM training: Proximal Policy Optimization (PPO), Direct Preference Optimization (DPO), Group Relative Policy Optimization (GRPO), and Dynamic Advantage Policy Optimization (DAPO). We present rigorous mathematical formulations for each algorithm, compare their architectural designs and computational requirements, and evaluate their empirical performance on mathematical reasoning benchmarks including AIME 2024. Our analysis reveals a clear evolutionary trajectory from value-based methods (PPO) to group-based methods (GRPO/DAPO), with each generation addressing critical limitations of its predecessor. Specifically, DAPO achieves 50\% accuracy on AIME 2024---a 67\% relative improvement over naive GRPO---through three key innovations: asymmetric Clip-Higher, dynamic sampling, and token-level loss normalization. We provide practical algorithm selection guidelines and identify open challenges for future research. To our knowledge, this is the first survey that unifies these four algorithms under a common mathematical framework with side-by-side experimental evaluation.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Reinforcement Learning, Large Language Models, PPO, DPO, GRPO, DAPO, RLHF, Alignment, Mathematical Reasoning
+\end{IEEEkeywords}
+
+%=============================================================
+\section{Introduction}
+\label{sec:intro}
+
+The emergence of large language models (LLMs) such as GPT-4~\cite{achiam2023gpt4}, LLaMA~\cite{touvron2023llama}, and Qwen2.5~\cite{yang2024qwen25} has fundamentally transformed natural language processing, enabling unprecedented capabilities in mathematical reasoning, code generation, scientific analysis, and creative writing. However, models trained solely via next-token prediction on large corpora often produce outputs that misalign with human preferences regarding helpfulness, safety, and factual accuracy.
+
+Reinforcement Learning from Human Feedback (RLHF)~\cite{christo2017deep, ouyang2022instructgpt} has emerged as the dominant paradigm for bridging this alignment gap. The canonical RLHF pipeline consists of three stages: (1)~Supervised Fine-Tuning (SFT) on high-quality demonstrations; (2)~Reward Model (RM) training on human preference comparisons; and (3)~RL-based policy optimization using the trained reward model. While stages 1 and 2 are relatively standardized, the choice of RL algorithm in stage~3 has profound implications for training stability, computational efficiency, and final model performance.
+
+The evolution of RL algorithms for LLM training has accelerated dramatically:
+
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+\item \textbf{PPO}~\cite{schulman2017ppo} (2017): The foundational algorithm, requiring both a policy network (Actor) and a value network (Critic). It has been the workhorse behind InstructGPT~\cite{ouyang2022instructgpt} and ChatGPT, but demands significant GPU memory for the dual-network architecture.
+\item \textbf{DPO}~\cite{rafailov2023dpo} (2023): A paradigm shift that eliminates explicit reward modeling by deriving a closed-form loss function from preference pairs. DPO simplifies the training pipeline but requires pre-collected preference data.
+\item \textbf{GRPO}~\cite{deepseek2025r1, shao2024deepseekmath} (2025): Introduced by DeepSeek, GRPO eliminates the value network by using group-level reward statistics as the advantage baseline. This reduces GPU memory by approximately 50\% compared to PPO.
+\item \textbf{DAPO}~\cite{yu2025dapo} (2025): Proposed by ByteDance, DAPO extends GRPO with three key innovations---asymmetric Clip-Higher, dynamic sampling, and token-level loss---achieving state-of-the-art 50\% accuracy on AIME 2024.
+\end{itemize}
+
+This survey makes the following contributions:
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item A \textbf{unified mathematical framework} with consistent notation across all four algorithms, enabling direct cross-algorithm comparison of objective functions and design choices.
+\item A \textbf{systematic architectural comparison} covering network requirements, clipping strategies, loss granularity, and KL constraint mechanisms.
+\item An \textbf{experimental evaluation} on mathematical reasoning benchmarks with quantitative results for training efficiency, model quality, and resource utilization.
+\item \textbf{Practical guidelines} for algorithm selection based on task characteristics and resource constraints.
+\end{enumerate}
+
+The remainder of this paper is organized as follows: Section~\ref{sec:bg} establishes background and notation; Sections~\ref{sec:ppo}--\ref{sec:dapo} present each algorithm in detail; Section~\ref{sec:compare} provides comparative analysis; Section~\ref{sec:exp} presents experimental results; Section~\ref{sec:discuss} discusses implications and future directions; and Section~\ref{sec:conclusion} concludes.

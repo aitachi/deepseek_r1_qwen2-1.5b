@@ -1,0 +1,187 @@
+% Section 5: DAPO + Comparative Analysis
+\section{Dynamic Advantage Policy Optimization (DAPO)}
+\label{sec:dapo}
+
+DAPO~\cite{yu2025dapo}, proposed by Yu et al.\ (ByteDance) in 2025, extends GRPO with three targeted innovations that collectively address its most significant limitations. DAPO achieves 50\% accuracy on AIME 2024---a 67\% relative improvement over naive GRPO (30\%)---using the same base model (Qwen2.5-32B).
+
+\subsection{Innovation 1: Asymmetric Clip-Higher}
+
+\subsubsection{The Entropy Collapse Problem in GRPO}
+
+In GRPO, symmetric clipping $\text{clip}(r_t, 1{-}\varepsilon, 1{+}\varepsilon)$ with $\varepsilon = 0.2$ creates an asymmetric constraint on policy entropy: the lower bound $1 - \varepsilon$ strongly suppresses token probabilities (down to 0.8$\times$), while the upper bound $1 + \varepsilon$ limits probability growth (up to 1.2$\times$). Over many training steps, this asymmetry causes the policy to progressively concentrate probability mass on a few tokens, leading to \textbf{entropy collapse}.
+
+\subsubsection{DAPO's Asymmetric Solution}
+
+DAPO introduces a higher upper clipping bound to allow greater probability growth for low-probability tokens:
+\begin{equation}
+\text{clip}(r_t,\ 1{-}\varepsilon_{\text{low}},\ 1{+}\varepsilon_{\text{high}}), \quad \varepsilon_{\text{low}}=0.2,\ \varepsilon_{\text{high}}=0.28
+\label{eq:clip_higher}
+\end{equation}
+
+The 40\% wider upper bound ($0.28$ vs $0.20$) enables tokens with positive advantage to increase their probability more aggressively. This promotes exploration and prevents the policy from becoming overly deterministic during long training runs. As shown in Fig.~\ref{fig:clip_higher}, the asymmetric clipping maintains higher policy entropy throughout training.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig4_clip_higher.png}
+\caption{Comparison of symmetric (GRPO) vs.\ asymmetric (DAPO) clipping. The wider upper bound in DAPO (blue) maintains higher entropy and prevents probability collapse compared to GRPO (orange) over training steps.}
+\label{fig:clip_higher}
+\end{figure}
+
+\subsection{Innovation 2: Dynamic Sampling with Overlong Filtering}
+
+\subsubsection{The Zero-Gradient Problem}
+
+When all $G$ responses for a prompt are either all correct or all incorrect, the group advantage becomes:
+\begin{itemize}[leftmargin=*, itemsep=0pt]
+\item All correct: $\hat{A}_i = 0 / \sigma_G = 0$ (no learning signal to improve further)
+\item All incorrect: $\hat{A}_i = 0 / \sigma_G = 0$ (no gradient to learn from failures)
+\end{itemize}
+Both cases produce zero effective gradients, wasting computational resources on uninformative samples.
+
+\subsubsection{DAPO's Dynamic Filtering}
+
+DAPO enforces that each training batch contains both correct and incorrect responses:
+\begin{equation}
+\text{Filter:} \quad 0 < |\{o_i : \text{is\_correct}(o_i)\}| < G
+\label{eq:dynamic}
+\end{equation}
+Prompts where all responses are correct (too easy) or all incorrect (too hard) are filtered out and replaced. This guarantees non-zero advantages and effective gradient updates for every training batch, improving sample efficiency.
+
+\subsection{Innovation 3: Token-Level Loss Normalization}
+
+\subsubsection{The Length Bias in Sample-Level Normalization}
+
+GRPO normalizes the loss by the number of samples $\frac{1}{G}\sum_{i=1}^{G}$. This means each sample contributes equally to the gradient regardless of its length. Consequently, short responses (which have fewer tokens contributing to the gradient) have disproportionately large per-token gradient magnitudes, while long responses are underweighted. This creates an implicit bias toward generating shorter outputs.
+
+\subsubsection{DAPO's Token-Level Normalization}
+
+DAPO normalizes by the total number of tokens across all responses in the group:
+\begin{equation}
+\boxed{
+\begin{aligned}
+J_{\text{DAPO}}(\theta) &= \E\!\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|} \ell_{i,t}\right] \\
+\ell_{i,t} &= \min\!\left(r_{i,t}\hat{A}_i,\ \text{clip}(r_{i,t}, 1{-}\varepsilon_{\text{low}}, 1{+}\varepsilon_{\text{high}})\hat{A}_i\right)
+\end{aligned}
+}
+\label{eq:dapo}
+\end{equation}
+
+This ensures each token contributes equally to the gradient regardless of which response it belongs to, eliminating the length bias. Fig.~\ref{fig:token_sample} illustrates the difference between the two normalization schemes.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig5_token_sample.png}
+\caption{Comparison of sample-level (GRPO) vs.\ token-level (DAPO) loss normalization. Token-level normalization assigns equal weight to each token, removing the implicit bias toward shorter responses present in sample-level normalization.}
+\label{fig:token_sample}
+\end{figure}
+
+\subsection{Overlong Reward Shaping}
+
+For excessively long responses that exceed the maximum context length, DAPO applies a smooth penalty:
+\begin{equation}
+R_{\text{length}}(y) = \begin{cases}
+0 & |y| \leq L_{\max} - L_{\text{cache}} \\
+\frac{L_{\max} - L_{\text{cache}} - |y|}{L_{\text{cache}}} & L_{\max} - L_{\text{cache}} < |y| \leq L_{\max} \\
+-1 & |y| > L_{\max}
+\end{cases}
+\label{eq:overlong}
+\end{equation}
+where $L_{\text{cache}}$ is a buffer zone length. This smooth transition prevents abrupt reward changes that could destabilize training. The effect of this shaping is visualized in Fig.~\ref{fig:overlong}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig6_overlong.png}
+\caption{DAPO's overlong reward shaping function. Responses within the normal length range receive no penalty. A linear penalty is applied in the buffer zone $[L_{\max} - L_{\text{cache}}, L_{\max}]$, with a maximum penalty of $-1$ for responses exceeding $L_{\max}$.}
+\label{fig:overlong}
+\end{figure}
+
+\subsection{Complete DAPO Objective}
+
+Combining all innovations, DAPO removes the KL penalty present in GRPO (relying on the Clip-Higher mechanism for stability instead) and uses token-level normalization with dynamic sampling:
+\begin{equation}
+\max_\theta J_{\text{DAPO}}(\theta) \quad \text{s.t.} \quad 0 < \sum_{i=1}^{G}\mathbb{1}[\text{correct}(o_i)] < G
+\label{eq:dapo_full}
+\end{equation}
+
+%=============================================================
+\section{Comparative Analysis}
+\label{sec:compare}
+
+\subsection{Architectural Comparison}
+
+Table~\ref{tab:arch} presents a comprehensive comparison of the four algorithms across 11 key architectural dimensions. The most significant differences lie in the value network requirement (PPO only), clipping strategy (symmetric vs.\ asymmetric), and loss granularity (sample vs.\ token level).
+
+\begin{table*}[ht]
+\centering
+\caption{Comprehensive Architectural Comparison of PPO, DPO, GRPO, and DAPO}
+\label{tab:arch}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Dimension} & \textbf{PPO} & \textbf{DPO} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+Year Proposed & 2017 & 2023 & 2025 & 2025 \\
+Value Network & \cmark{} Required & \xmark{} Not needed & \xmark{} Not needed & \xmark{} Not needed \\
+Reward Model & \cmark{} Explicit RM & \xmark{} Implicit & \cmark{} Rule-based & \cmark{} Rule-based \\
+Reference Model & \xmark{} Optional & \cmark{} Required & \cmark{} Required & \cmark{} Required \\
+Clipping Strategy & Symmetric & None & Symmetric & \textbf{Asymmetric} \\
+Clipping Range & $[0.8, 1.2]$ & N/A & $[0.8, 1.2]$ & $[\mathbf{0.8, 1.28}]$ \\
+Loss Granularity & Token-level & Sequence-level & Sample-level & \textbf{Token-level} \\
+Group Sampling & No & No & Yes (fixed $G{=}16$) & Yes (dynamic) \\
+KL Constraint & None & Implicit via $\beta$ & Explicit penalty & \textbf{Removed} \\
+Training Data & Online rollouts & Offline preferences & Online rollouts & Online rollouts \\
+Relative GPU Memory & $\sim$2.0$\times$ & $\sim$1.0$\times$ & $\sim$1.0$\times$ & $\sim$1.2$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Key Technical Differences: GRPO vs.\ DAPO}
+
+Since DAPO is a direct extension of GRPO, Table~\ref{tab:tech} isolates the four critical differences that contribute to DAPO's superior performance.
+
+\begin{table}[ht]
+\centering
+\caption{Critical Technical Differences Between GRPO and DAPO}
+\label{tab:tech}
+\begin{tabular}{p{2cm}p{2.5cm}p{2.5cm}}
+\toprule
+\textbf{Dimension} & \textbf{GRPO} & \textbf{DAPO} \\
+\midrule
+Clipping Range & $[1{-}\varepsilon,\ 1{+}\varepsilon]$ symmetric & $[1{-}\varepsilon_l,\ 1{+}\varepsilon_h]$ asymmetric \\
+Loss Normalization & $\frac{1}{G}\sum_i$ (sample-level) & $\frac{1}{\sum_i |o_i|}\sum_i\sum_t$ (token-level) \\
+Batch Filtering & None (fixed $G{=}16$) & Dynamic ($0 < \text{correct} < G$) \\
+KL Penalty & $\beta D_{\text{KL}}$ (explicit) & Removed (Clip-Higher suffices) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evolutionary Trajectory}
+
+The four algorithms represent a clear evolutionary trajectory in LLM training:
+
+\textbf{PPO $\to$ DPO:} Eliminated the reward model by deriving a closed-form loss from preference data, trading online exploration capability for training simplicity.
+
+\textbf{PPO $\to$ GRPO:} Eliminated the value network by using group-level reward statistics as the advantage baseline, reducing memory by $\sim$50\% and simplifying the architecture.
+
+\textbf{GRPO $\to$ DAPO:} Addressed entropy collapse (Clip-Higher), sample efficiency (dynamic sampling), and length bias (token-level loss), achieving 67\% relative improvement on AIME.
+
+\subsection{Multi-Dimensional Performance Comparison}
+
+Fig.~\ref{fig:radar} presents an 8-dimensional radar chart comparing the algorithms across training stability, memory efficiency, sample efficiency, final accuracy, ease of implementation, exploration capability, scalability, and data requirements.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig7_radar.png}
+\caption{Multi-dimensional performance comparison. Each axis represents a key metric scored from 0 to 10. DAPO achieves the highest overall score driven by accuracy and sample efficiency, while GRPO leads in memory efficiency, and DPO excels in ease of implementation.}
+\label{fig:radar}
+\end{figure}
+
+\subsection{3D Performance Landscape}
+
+Fig.~\ref{fig:3d_surface} visualizes the three-way trade-off between GPU memory, training time, and final accuracy for all four algorithms. DAPO occupies the desirable region of high accuracy with moderate resource requirements.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\columnwidth]{ieee_fig8_3d_surface.png}
+\caption{3D performance landscape showing the trade-off between GPU memory consumption, training wall-clock time, and final model accuracy. PPO (red) requires the most resources; DAPO (purple) achieves the highest accuracy; GRPO (green) is the most memory-efficient.}
+\label{fig:3d_surface}
+\end{figure}

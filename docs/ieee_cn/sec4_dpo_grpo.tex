@@ -1,0 +1,112 @@
+% 中文版 Section 4: DPO与GRPO
+\section{直接偏好优化（DPO）}
+\label{sec:dpo}
+
+\subsection{动机：简化RLHF流程}
+
+DPO~\cite{rafailov2023dpo}由Rafailov等人于2023年提出，代表了LLM对齐中的范式转变。DPO无需训练显式奖励模型再通过RL优化，而是推导出一个闭式损失函数，直接从偏好数据优化策略。其核心理论洞见在于：最优RLHF策略具有闭式解。
+
+\subsection{从KL约束的RLHF目标推导}
+
+KL约束的RLHF优化问题为：
+\begin{equation}
+\max_\pi \E_{x \sim \mathcal{D}, y \sim \pi}\left[r(x,y)\right] - \beta \cdot D_{\text{KL}}\!\left[\pi(\cdot|x) \| \pi_{\text{ref}}(\cdot|x)\right]
+\end{equation}
+
+闭式最优策略为：
+\begin{equation}
+\pi^*(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\!\left(\frac{1}{\beta}r(x,y)\right)
+\end{equation}
+其中$Z(x) = \sum_y \pi_{\text{ref}}(y|x)\exp(r(x,y)/\beta)$为配分函数（计算不可行但在损失中会消去）。
+
+\subsection{DPO损失函数}
+
+将最优策略代入Bradley-Terry偏好模型并整理后，得到仅依赖策略和参考模型的DPO损失：
+\begin{equation}
+\boxed{
+\begin{aligned}
+L^{\text{DPO}}(\theta) &= -\E_{(x,y_w,y_l)}\bigl[\log\sigma\bigl(\beta\cdot h(y_w,y_l,x)\bigr)\bigr] \\
+h(y_w,y_l,x) &= \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}
+\end{aligned}
+}
+\label{eq:dpo}
+\end{equation}
+
+\textbf{解释：}$\sigma(\cdot)$内部的项是优选响应与拒绝响应的对数比率之差。DPO使$y_w$相对于$\pi_{\text{ref}}$的似然提升大于$y_l$的提升。温度$\beta$控制模型区分偏好和拒绝输出的锐度。
+
+从训练好的策略中恢复的隐式奖励为：
+\begin{equation}
+\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}
+\end{equation}
+
+\subsection{架构需求}
+
+DPO仅需\textbf{两个模型组件}：可训练策略$\pi_\theta$和冻结参考$\pi_{\text{ref}}$。无需奖励模型或价值网络，显著简化了训练流程。内存需求约为PPO的一半。
+
+\subsection{优势与局限}
+
+\textbf{优势：}四种算法中实现最简单；无需奖励模型训练；训练动态稳定；兼容离线偏好数据。
+
+\textbf{局限：}需要预先收集的偏好对$(y_w, y_l)$，获取成本高；无法利用在线探索；性能受限于偏好数据的质量和覆盖范围；不适用于具有客观奖励信号的任务（如数学验证）。
+
+%=============================================================
+\section{组相对策略优化（GRPO）}
+\label{sec:grpo}
+
+\subsection{通过组基线消除价值网络}
+
+GRPO~\cite{deepseek2025r1, shao2024deepseekmath}由DeepSeek团队于2025年初提出，解决了PPO的主要局限——对独立价值网络的需求。其核心洞见是：对于具有确定性、基于规则的奖励函数的任务（如数学答案验证），可以使用组级统计量而非学习型价值函数来估计优势。
+
+\subsection{组优势估计}
+
+对于每个提示词$q$，GRPO从当前策略生成一组$G$个响应$\{o_1, o_2, \ldots, o_G\}$。每个响应获得奖励$R_i = r(q, o_i)$。优势通过组归一化计算：
+\begin{equation}
+\hat{A}_i = \frac{R_i - \mu_G}{\sigma_G + \epsilon}
+\label{eq:grpo_adv}
+\end{equation}
+其中：
+\begin{equation}
+\mu_G = \frac{1}{G}\sum_{j=1}^{G}R_j, \quad \sigma_G = \sqrt{\frac{1}{G}\sum_{j=1}^{G}(R_j - \mu_G)^2}
+\end{equation}
+
+\textbf{直觉：}优势度量特定响应相对于组平均水平的好坏程度。$R_i > \mu_G$的响应获得正优势并被强化；$R_i < \mu_G$的响应获得负优势并被抑制。这类似于RL文献中的留一法基线方法。
+
+\subsection{GRPO目标函数}
+
+GRPO目标结合了裁剪代理优化与显式KL惩罚：
+\begin{equation}
+\boxed{
+\begin{aligned}
+J_{\text{GRPO}}(\theta) = \E&_{q \sim \mathcal{D}}\biggl[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\Bigl(r_{i,t}\hat{A}_i, \\
+&\text{clip}(r_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_i\Bigr) - \beta D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})\biggr]
+\end{aligned}
+}
+\label{eq:grpo}
+\end{equation}
+其中$r_{i,t} = \pi_\theta(o_{i,t}|q, o_{i,<t}) / \pi_{\theta_{\text{old}}}(o_{i,t}|q, o_{i,<t})$为词元级重要性比率。
+
+KL散度使用GRPO作者提出的无偏估计器：
+\begin{equation}
+D_{\text{KL}} = \frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,<t})}{\pi_\theta(o_{i,t}|q, o_{i,<t})} - \log\frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,<t})}{\pi_\theta(o_{i,t}|q, o_{i,<t})} - 1
+\end{equation}
+
+\subsection{算法流程}
+
+GRPO训练循环如下：
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item 从$\mathcal{D}$中采样一批提示词$\{q_1, \ldots, q_B\}$。
+\item 对每个提示词，使用当前策略$\pi_\theta$生成$G$个响应。
+\item 使用规则型验证器计算奖励$\{R_1, \ldots, R_G\}$。
+\item 通过式\ref{eq:grpo_adv}计算组归一化优势$\hat{A}_i$。
+\item 通过最大化GRPO目标（式\ref{eq:grpo}）更新$\theta$。
+\end{enumerate}
+
+\subsection{架构需求}
+
+GRPO仅需\textbf{两个模型组件}：策略$\pi_\theta$和参考模型$\pi_{\text{ref}}$。对于规则型奖励任务无需价值网络或奖励模型。GPU内存较PPO减少约50\%。
+
+\subsection{优势与局限}
+
+\textbf{优势：}消除价值网络（内存减少50\%）；天然适配可验证任务；组采样提供稳定的优势估计；工程实现比PPO简单。
+
+\textbf{局限：}每个提示词需要$G$次推理（组采样开销）；对称裁剪可能导致熵坍塌；样本级归一化偏向短响应；需要规则型奖励（不适用于主观偏好对齐）。

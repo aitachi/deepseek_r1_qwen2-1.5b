@@ -1,0 +1,70 @@
+% 中文版 Section 2: 背景与预备知识
+\section{背景与预备知识}
+\label{sec:bg}
+
+\subsection{LLM中的强化学习建模}
+
+在LLM对齐的语境下，训练过程被建模为上下文赌博机（Contextual Bandit）问题而非完整的马尔可夫决策过程（MDP）。这种建模是合理的，因为模型在自回归地生成完整响应后才接收奖励信号。形式化定义如下：
+
+\begin{itemize}[leftmargin=*, itemsep=1pt]
+\item \textbf{状态/上下文} $x \sim \mathcal{D}$：从训练分布$\mathcal{D}$中采样的输入提示词。
+\item \textbf{动作/响应} $y = (y_1, y_2, \ldots, y_T)$：模型生成的词元序列，$T$为响应长度。
+\item \textbf{策略} $\pi_\theta(y|x) = \prod_{t=1}^{T} \pi_\theta(y_t | x, y_{<t})$：以$\theta$为参数的自回归语言模型。
+\item \textbf{奖励} $r(x, y) \in \mathbb{R}$：评估给定提示词$x$下响应$y$质量的标量信号。
+\end{itemize}
+
+优化目标是寻找使期望奖励最大化的策略参数$\theta^*$：
+\begin{equation}
+\theta^* = \arg\max_\theta J(\theta) = \arg\max_\theta \E_{x \sim \mathcal{D},\ y \sim \pi_\theta(\cdot|x)}\left[r(x, y)\right]
+\label{eq:obj}
+\end{equation}
+
+一个关键挑战是防止策略偏离参考模型$\pi_{\text{ref}}$（通常是SFT检查点）过远，因为无约束优化可能导致奖励黑客攻击和模式坍塌。不同算法通过不同机制解决这一约束：显式KL惩罚（GRPO）、隐式正则化（DPO）、裁剪代理目标（PPO、DAPO）或其组合。
+
+\subsection{RLHF流程详解}
+
+标准RLHF流程包含三个阶段：
+
+\textbf{阶段1 --- 监督微调（SFT）：}在高质量示范数据$\{(x_i, y_i^*)\}_{i=1}^{N}$上使用最大似然估计微调预训练语言模型：
+\begin{equation}
+\mathcal{L}_{\text{SFT}}(\theta) = -\E_{(x,y^*) \sim \mathcal{D}_{\text{demo}}}\left[\log \pi_\theta(y^*|x)\right]
+\end{equation}
+得到的模型$\pi_{\text{SFT}}$作为后续RL训练的初始化和参考模型$\pi_{\text{ref}}$。
+
+\textbf{阶段2 --- 奖励模型训练：}在人类偏好对$(x, y_w, y_l)$上训练奖励模型$r_\phi(x, y)$，其中$y_w \succ y_l$表示$y_w$优于$y_l$。Bradley-Terry模型提供训练目标：
+\begin{equation}
+\mathcal{L}_{\text{RM}}(\phi) = -\E\left[\log \sigma\left(r_\phi(x, y_w) - r_\phi(x, y_l)\right)\right]
+\end{equation}
+其中$\sigma(\cdot)$为Logistic Sigmoid函数。
+
+\textbf{阶段3 --- RL策略优化：}使用RL算法对语言模型策略$\pi_\theta$进行优化。这是算法选择（PPO、GRPO、DAPO）最关键的阶段。DPO通过直接在偏好对上优化完全绕过了阶段2和3。
+
+\subsection{统一符号}
+
+表\ref{tab:notation}建立了全文使用的统一符号体系。
+
+\begin{table}[ht]
+\centering
+\caption{本文使用的统一数学符号}
+\label{tab:notation}
+\begin{tabular}{cl}
+\toprule
+\textbf{符号} & \textbf{定义} \\
+\midrule
+$\pi_\theta$ & 当前策略网络（正在训练的LLM） \\
+$\pi_{\text{ref}}$ & 参考（冻结）策略，通常为SFT模型 \\
+$\pi_{\theta_{\text{old}}}$ & 上一步更新的策略参数 \\
+$r(x,y)$ & 奖励函数（学习型或规则型） \\
+$\hat{A}$ & 优势函数估计值 \\
+$r_t(\theta)$ & 重要性采样比率 $\pi_\theta/\pi_{\theta_{\text{old}}}$ \\
+$\varepsilon$ & PPO/GRPO对称裁剪参数 \\
+$\varepsilon_{\text{low}}, \varepsilon_{\text{high}}$ & DAPO非对称裁剪边界 \\
+$\beta$ & KL惩罚系数或DPO温度 \\
+$G$ & GRPO/DAPO的组采样大小 \\
+$\gamma, \lambda$ & 折扣因子和GAE衰减参数 \\
+$V_\phi$ & PPO的价值网络（Critic） \\
+$y_w, y_l$ & 偏好对中的优选和拒绝响应 \\
+$|o_i|$ & 第$i$个响应的词元长度 \\
+\bottomrule
+\end{tabular}
+\end{table}
