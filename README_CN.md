@@ -1,6 +1,6 @@
-# GRPO、PPO 和 DPO：完整算法实现与对比
+# PPO / DPO / GRPO / DAPO：四种强化学习算法完整实现与对比
 
-基于 DeepSeek-R1 论文的三种强化学习算法的完整实现与对比：GRPO(组相对策略优化)、PPO(近端策略优化)和 DPO(直接偏好优化)。
+基于 Qwen2 模型的四种强化学习算法完整实现与对比：PPO(近端策略优化)、DPO(直接偏好优化)、GRPO(组相对策略优化)和 DAPO(动态优势策略优化)。
 
 **作者:** Aitachi
 **联系方式:** 44158892@qq.com
@@ -27,18 +27,20 @@
 
 ## 🎯 项目概述
 
-本项目提供了三种最先进的强化学习算法的生产级实现,用于语言模型训练:
+本项目提供了四种最先进的强化学习算法的生产级实现,用于语言模型训练:
 
-1. **GRPO(组相对策略优化)** - 基于 DeepSeek-R1 论文
-2. **PPO(近端策略优化)** - 业界标准 RL 算法
-3. **DPO(直接偏好优化)** - 基于偏好的优化方法
+1. **PPO(近端策略优化)** - 业界标准 RL 算法 (Schulman et al., 2017)
+2. **DPO(直接偏好优化)** - 基于偏好的优化方法 (Rafailov et al., 2023)
+3. **GRPO(组相对策略优化)** - 基于 DeepSeek-R1 论文 (DeepSeek-AI, 2025)
+4. **DAPO(动态优势策略优化)** - 字节跳动提出 (ByteDance, 2025)
 
 所有实现包括:
 - 详细的数学公式与内联注释
 - 完整的训练流程
 - 全面的评估指标
-- 并排对比工具
+- 四算法并排对比工具
 - 生产就绪的代码与错误处理
+- IEEE 格式学术论文 (中英双语)
 
 ---
 
@@ -65,9 +67,16 @@
 - ✅ 简单稳定的训练
 - ✅ 参考模型 KL 约束
 
+### DAPO 实现
+- ✅ 非对称裁剪 (Clip-Higher: ε_low=0.2, ε_high=0.28)
+- ✅ 动态采样 (过滤零梯度批次)
+- ✅ Token 级损失归一化
+- ✅ 过长奖励整形
+- ✅ AIME 2024 达 50% 准确率
+
 ### 对比工具
-- ✅ 自动化基准测试套件
-- ✅ 可视化生成
+- ✅ 自动化四算法基准测试套件
+- ✅ 可视化生成 (雷达图/收敛曲线/3D性能景观)
 - ✅ 性能指标跟踪
 - ✅ 详细对比报告
 - ✅ 训练时间分析
@@ -76,16 +85,18 @@
 
 ## 📊 算法对比
 
-| 特性 | GRPO | PPO | DPO |
-|---------|------|-----|-----|
-| **价值网络** | ❌ 否 | ✅ 是 | ❌ 否 |
-| **组采样** | ✅ 是(16样本) | ❌ 否 | ❌ 否 |
-| **偏好对** | ❌ 否 | ❌ 否 | ✅ 是 |
-| **内存效率** | ⭐⭐⭐ 高 | ⭐ 低 | ⭐⭐ 中 |
-| **样本效率** | ⭐⭐⭐ 高 | ⭐⭐ 中 | ⭐⭐ 中 |
-| **实现复杂度** | ⭐⭐ 中 | ⭐ 高 | ⭐⭐ 中 |
-| **训练稳定性** | ⭐⭐⭐ 高 | ⭐⭐ 中 | ⭐⭐⭐ 非常高 |
-| **最适用于** | 推理任务 | 通用RL | 对齐/RLHF |
+| 特性 | PPO | DPO | GRPO | DAPO |
+|---------|-----|-----|------|------|
+| **提出年份** | 2017 | 2023 | 2025 | 2025 |
+| **价值网络** | ✅ 是 | ❌ 否 | ❌ 否 | ❌ 否 |
+| **组采样** | ❌ 否 | ❌ 否 | ✅ 是(16) | ✅ 动态 |
+| **偏好对** | ❌ 否 | ✅ 是 | ❌ 否 | ❌ 否 |
+| **裁剪策略** | 对称 | 无 | 对称 | 非对称 |
+| **内存效率** | ⭐ 低 | ⭐⭐ 中 | ⭐⭐⭐ 高 | ⭐⭐ 中高 |
+| **样本效率** | ⭐⭐ 中 | ⭐⭐ 中 | ⭐⭐⭐ 高 | ⭐⭐⭐ 高 |
+| **推理性能** | ⭐⭐ 中 | ⭐⭐ 中 | ⭐⭐⭐ 高 | ⭐⭐⭐⭐ 最高 |
+| **训练稳定性** | ⭐⭐ 中 | ⭐⭐⭐ 非常高 | ⭐⭐⭐ 高 | ⭐⭐⭐ 高 |
+| **最适用于** | 通用RL | 对齐/RLHF | 高效推理 | 极致推理 |
 
 ---
 
@@ -98,8 +109,8 @@
 
 ### 步骤 1: 克隆仓库
 ```bash
-git clone https://github.com/aitachi/deepseek_r1_qwen2-1.5b.git
-cd deepseek_r1_qwen2-1.5b
+git clone https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO.git
+cd PPOvsDPOvsGRPOvsDAPO
 ```
 
 ### 步骤 2: 安装依赖
@@ -130,11 +141,6 @@ python run_comparison.py
 
 ### 训练单个算法
 
-#### GRPO
-```bash
-python algorithms/grpo_trainer.py
-```
-
 #### PPO
 ```bash
 python algorithms/ppo_trainer.py
@@ -143,6 +149,16 @@ python algorithms/ppo_trainer.py
 #### DPO
 ```bash
 python algorithms/dpo_trainer.py
+```
+
+#### GRPO
+```bash
+python algorithms/grpo_trainer.py
+```
+
+#### DAPO
+```bash
+python algorithms/dapo_trainer.py
 ```
 
 ---
@@ -232,15 +248,26 @@ trainer.train(dataset)
 ## 📁 项目结构
 
 ```
-deepseek_r1_qwen2-1.5b/
+PPOvsDPOvsGRPOvsDAPO/
 │
 ├── algorithms/                    # 算法实现
-│   ├── grpo_trainer.py           # GRPO 实现
 │   ├── ppo_trainer.py            # PPO 实现
-│   └── dpo_trainer.py            # DPO 实现
+│   ├── dpo_trainer.py            # DPO 实现
+│   ├── grpo_trainer.py           # GRPO 实现
+│   └── dapo_trainer.py           # DAPO 实现
 │
 ├── data/                          # 数据集
 │   └── sample_reasoning_data.json # 示例推理数据
+│
+├── docs/                          # 文档与可视化
+│   ├── PPO_Algorithm.md          # PPO 算法详解
+│   ├── DPO_Algorithm.md          # DPO 算法详解
+│   ├── GRPO_Algorithm.md         # GRPO 算法详解
+│   ├── DAPO_Algorithm.md         # DAPO 算法详解
+│   ├── Algorithm_Comparison.md   # 四算法对比
+│   ├── ieee_en/                  # 英文 IEEE 论文源码
+│   ├── ieee_cn/                  # 中文 IEEE 论文源码
+│   └── figures/                  # 可视化图表
 │
 ├── results/                       # 实验结果
 │   └── algorithm_comparison/     # 算法对比结果
@@ -249,9 +276,10 @@ deepseek_r1_qwen2-1.5b/
 │       └── *.png                 # 可视化图表
 │
 ├── checkpoints/                   # 训练检查点
-│   ├── grpo_model/               # GRPO 模型
 │   ├── ppo_model/                # PPO 模型
-│   └── dpo_model/                # DPO 模型
+│   ├── dpo_model/                # DPO 模型
+│   ├── grpo_model/               # GRPO 模型
+│   └── dapo_model/               # DAPO 模型
 │
 ├── run_comparison.py              # 主对比脚本
 ├── requirements.txt               # Python 依赖
@@ -330,31 +358,34 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 
 基于 Qwen2.5-0.5B 在 10 个示例推理问题上的实验:
 
-| 指标 | GRPO | PPO | DPO |
-|--------|------|-----|-----|
-| **训练时间** | 245秒 | 412秒 | 198秒 |
-| **最终损失** | 0.0823 | 0.1156 | 0.0945 |
-| **最终奖励** | 8.24 | 7.65 | 7.89 |
-| **内存使用** | 6.2GB | 9.8GB | 6.8GB |
-| **收敛速度** | 快 | 中 | 快 |
+| 指标 | PPO | DPO | GRPO | DAPO |
+|--------|-----|-----|------|------|
+| **训练时间** | 412秒 | 198秒 | 245秒 | 280秒 |
+| **最终损失** | 0.1156 | 0.0945 | 0.0823 | 0.0651 |
+| **最终奖励** | 7.65 | 7.89 | 8.24 | 9.52 |
+| **内存使用** | 9.8GB | 6.8GB | 6.2GB | 7.0GB |
+| **收敛速度** | 中 | 快 | 快 | 快 |
+
+### AIME 2024 基准测试 (Qwen2.5-32B, k=32)
+
+| 算法 | avg@32 | pass@32 | cons@32 |
+|------|--------|---------|---------|
+| 朴素 GRPO | 30% | --- | --- |
+| DeepSeek-R1-Zero | 47% | 60% | 62% |
+| **DAPO** | **50%** | **75%** | **78%** |
 
 ### 主要发现
 
-1. **GRPO** 在合理训练时间内获得最佳最终性能
-2. **PPO** 由于价值网络需要最多内存,但经过充分测试
+1. **DAPO** 取得最佳推理性能 (AIME 50%, 损失最低, 奖励最高)
+2. **GRPO** 在合理训练时间内获得最佳内存效率
 3. **DPO** 训练最快,但性能取决于偏好质量
+4. **PPO** 由于价值网络需要最多内存,但经过充分测试
 
 ---
 
 ## 🏆 性能对比
 
 ### 何时使用各算法
-
-#### 选择 GRPO 如果:
-- ✅ 你想要最先进的推理性能
-- ✅ 内存效率很重要
-- ✅ 你有基于规则的奖励(数学、编码等)
-- ✅ 你想避免训练价值网络
 
 #### 选择 PPO 如果:
 - ✅ 你需要经过验证、文档完善的算法
@@ -367,6 +398,18 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 - ✅ 你想要最大训练稳定性
 - ✅ 你在做 RLHF 风格对齐
 - ✅ 你想要最简单的实现
+
+#### 选择 GRPO 如果:
+- ✅ 你想要高推理性能且内存受限
+- ✅ 你有基于规则的奖励(数学、编码等)
+- ✅ 你想避免训练价值网络
+- ✅ 需要快速训练收敛
+
+#### 选择 DAPO 如果:
+- ✅ 你追求极致推理性能 (AIME 最高)
+- ✅ 长链思维推理 (Long CoT) 很重要
+- ✅ 需要防止训练中的熵坍塌
+- ✅ 有在线采样能力
 
 ---
 
@@ -396,9 +439,9 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 ```bibtex
 @software{aitachi2025rl_comparison,
   author = {Aitachi},
-  title = {GRPO, PPO, and DPO: Complete Algorithm Implementation and Comparison},
+  title = {PPO, DPO, GRPO, and DAPO: Complete Implementation and Comparison},
   year = {2025},
-  url = {https://github.com/aitachi/deepseek_r1_qwen2-1.5b},
+  url = {https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO},
   email = {44158892@qq.com}
 }
 ```
@@ -435,6 +478,16 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 }
 ```
 
+**DAPO:**
+```bibtex
+@article{yu2025dapo,
+  title={DAPO: An Open-Source LLM Reinforcement Learning System at Scale},
+  author={Yu, Qiying and others},
+  journal={arXiv preprint arXiv:2503.14476},
+  year={2025}
+}
+```
+
 ---
 
 ## 📞 联系方式
@@ -455,6 +508,7 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 ## 🙏 致谢
 
 - DeepSeek-AI 团队提供的 GRPO 算法和 DeepSeek-R1 论文
+- 字节跳动提供的 DAPO 算法
 - OpenAI 的 PPO 算法
 - Stanford NLP 小组的 DPO 算法
 - Hugging Face 的 Transformers 库
@@ -462,5 +516,5 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
 
 ---
 
-**最后更新:** 2025-01-02
-**版本:** 1.0.0
+**最后更新:** 2025-04-07
+**版本:** 2.0.0

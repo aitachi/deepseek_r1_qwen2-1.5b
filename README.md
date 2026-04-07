@@ -459,8 +459,9 @@ PPO (2017)  ──→  DPO (2023)  : 消除奖励模型，闭式损失
 ```bibtex
 @software{aitachi2025rl_comparison,
   author = {Aitachi},
-  title = {PPO, DPO, GRPO, and DAPO: Complete Implementation and Comparison},
+  title = {PPO vs DPO vs GRPO vs DAPO: Complete Implementation and Comparison},
   year = {2025},
+  url = {https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO},
   email = {44158892@qq.com}
 }
 ```
@@ -476,7 +477,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Acknowledgments
 
 - DeepSeek-AI team for GRPO algorithm and DeepSeek-R1 paper
-- ByteDance for DAPO algorithm
+- ByteDance for DAPO algorithm and open-source release
 - OpenAI for PPO algorithm
 - Stanford NLP group for DPO algorithm
 - Hugging Face for Transformers library

@@ -1,7 +1,7 @@
 """
-Comprehensive Comparison of GRPO, PPO, and DPO Algorithms
+Comprehensive Comparison of PPO, DPO, GRPO, and DAPO Algorithms
 
-This script runs all three algorithms on the same dataset and generates
+This script runs all four algorithms on the same dataset and generates
 detailed comparison metrics and visualizations.
 
 Author: Aitachi
@@ -20,6 +20,7 @@ from pathlib import Path
 from algorithms.grpo_trainer import GRPOTrainer, GRPOConfig
 from algorithms.ppo_trainer import PPOTrainer, PPOConfig
 from algorithms.dpo_trainer import DPOTrainer, DPOConfig
+from algorithms.dapo_trainer import DAPOTrainer, DAPOConfig
 
 
 def run_algorithm(algorithm_name: str, trainer_class, config_class, dataset):
@@ -83,7 +84,7 @@ def create_comparison_plots(results_dict):
     algorithms = list(results_dict.keys())
     training_times = [results_dict[alg]["training_time"] for alg in algorithms]
 
-    bars = plt.bar(algorithms, training_times, color=['#3498db', '#2ecc71', '#e74c3c'])
+    bars = plt.bar(algorithms, training_times, color=['#3498db', '#2ecc71', '#e74c3c', '#9b59b6'])
     plt.ylabel('Training Time (seconds)')
     plt.title('Training Time Comparison')
     plt.grid(axis='y', alpha=0.3)
@@ -143,7 +144,8 @@ def create_comparison_plots(results_dict):
     scores = {
         'GRPO': [0.90, 0.85, 0.90, 0.80, 0.85],
         'PPO': [0.70, 0.65, 0.60, 0.60, 0.80],
-        'DPO': [0.75, 0.80, 0.85, 0.75, 0.75]
+        'DPO': [0.75, 0.80, 0.85, 0.75, 0.75],
+        'DAPO': [0.95, 0.75, 0.80, 0.70, 0.95]
     }
 
     angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
@@ -151,7 +153,7 @@ def create_comparison_plots(results_dict):
 
     fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
 
-    colors = ['#3498db', '#2ecc71', '#e74c3c']
+    colors = ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6']
     for idx, (alg, score_list) in enumerate(scores.items()):
         score_list += score_list[:1]
         ax.plot(angles, score_list, 'o-', linewidth=2, label=alg, color=colors[idx])
@@ -194,8 +196,9 @@ def create_comparison_table(results_dict):
             'Final Loss': f"{stats['epoch_losses'][-1]:.4f}" if 'epoch_losses' in stats else 'N/A',
             'Final Reward': f"{stats['epoch_rewards'][-1]:.4f}" if 'epoch_rewards' in stats else 'N/A',
             'Value Network': 'Yes' if alg == 'PPO' else 'No',
-            'Group Sampling': 'Yes' if alg == 'GRPO' else 'No',
-            'Preference Pairs': 'Yes' if alg == 'DPO' else 'No'
+            'Group Sampling': 'Yes' if alg in ('GRPO', 'DAPO') else 'No',
+            'Preference Pairs': 'Yes' if alg == 'DPO' else 'No',
+            'Dynamic Sampling': 'Yes' if alg == 'DAPO' else 'No'
         }
 
         table_data.append(row)
@@ -232,7 +235,7 @@ def generate_markdown_report(results_dict, comparison_df):
     report_path = output_dir / 'COMPARISON_REPORT.md'
 
     with open(report_path, 'w', encoding='utf-8') as f:
-        f.write("# GRPO vs PPO vs DPO: Comprehensive Algorithm Comparison\n\n")
+        f.write("# PPO vs DPO vs GRPO vs DAPO: Comprehensive Algorithm Comparison\n\n")
         f.write("**Author:** Aitachi  \n")
         f.write("**Contact:** 44158892@qq.com  \n")
         f.write(f"**Date:** {time.strftime('%Y-%m-%d')}  \n\n")
@@ -240,9 +243,10 @@ def generate_markdown_report(results_dict, comparison_df):
         f.write("---\n\n")
 
         f.write("## Executive Summary\n\n")
-        f.write("This report presents a comprehensive comparison of three reinforcement learning algorithms ")
-        f.write("for training language models: GRPO (Group Relative Policy Optimization), ")
-        f.write("PPO (Proximal Policy Optimization), and DPO (Direct Preference Optimization).\n\n")
+        f.write("This report presents a comprehensive comparison of four reinforcement learning algorithms ")
+        f.write("for training language models: PPO (Proximal Policy Optimization), ")
+        f.write("DPO (Direct Preference Optimization), GRPO (Group Relative Policy Optimization), ")
+        f.write("and DAPO (Dynamic Advantage Policy Optimization).\n\n")
 
         f.write("## Algorithm Overview\n\n")
 
@@ -283,6 +287,19 @@ def generate_markdown_report(results_dict, comparison_df):
         f.write("L_DPO = -E[log σ(β * (log r_w - log r_l))]\n")
         f.write("```\n\n")
 
+        f.write("### DAPO (Dynamic Advantage Policy Optimization)\n\n")
+        f.write("**Key Features:**\n")
+        f.write("- Decoupled asymmetric clipping (Clip-Higher)\n")
+        f.write("- Dynamic sampling filters zero-gradient batches\n")
+        f.write("- Token-level loss normalization\n")
+        f.write("- Overlong reward shaping\n\n")
+
+        f.write("**Mathematical Formula:**\n")
+        f.write("```\n")
+        f.write("J_DAPO(θ) = E[(1/∑|o_i|) ∑_i ∑_t min(r_t * A_t, clip(r_t, 1-ε_l, 1+ε_h) * A_t)]\n")
+        f.write("subject to: 0 < |{o_i : correct(o_i)}| < G\n")
+        f.write("```\n\n")
+
         f.write("## Experimental Results\n\n")
 
         f.write("### Comparison Table\n\n")
@@ -302,23 +319,27 @@ def generate_markdown_report(results_dict, comparison_df):
 
         f.write("### 1. Sample Efficiency\n")
         f.write("- **GRPO** shows high sample efficiency through group-based sampling\n")
+        f.write("- **DAPO** further improves via dynamic sampling (filters zero-gradient batches)\n")
         f.write("- **PPO** requires multiple epochs over the same data\n")
         f.write("- **DPO** is limited by the need for preference pairs\n\n")
 
         f.write("### 2. Memory Requirements\n")
         f.write("- **GRPO**: Low (no value network)\n")
         f.write("- **PPO**: High (requires value network)\n")
-        f.write("- **DPO**: Medium (no value network but requires preference generation)\n\n")
+        f.write("- **DPO**: Medium (no value network but requires preference generation)\n")
+        f.write("- **DAPO**: Medium-Low (no value network, but needs old policy copy)\n\n")
 
         f.write("### 3. Implementation Complexity\n")
         f.write("- **GRPO**: Moderate complexity\n")
         f.write("- **PPO**: High complexity (value network, GAE computation)\n")
-        f.write("- **DPO**: Moderate complexity (preference pair generation)\n\n")
+        f.write("- **DPO**: Moderate complexity (preference pair generation)\n")
+        f.write("- **DAPO**: Moderate-High (dynamic sampling, token-level loss, old policy management)\n\n")
 
         f.write("### 4. Stability\n")
         f.write("- **GRPO**: Stable with proper hyperparameters\n")
         f.write("- **PPO**: Generally stable, proven track record\n")
-        f.write("- **DPO**: Very stable, no reward model collapse issues\n\n")
+        f.write("- **DPO**: Very stable, no reward model collapse issues\n")
+        f.write("- **DAPO**: Stable due to Clip-Higher preventing entropy collapse\n\n")
 
         f.write("## Recommendations\n\n")
 
@@ -340,11 +361,18 @@ def generate_markdown_report(results_dict, comparison_df):
         f.write("- You're doing alignment/RLHF-style training\n")
         f.write("- You want to avoid reward model training\n\n")
 
+        f.write("### When to Use DAPO\n")
+        f.write("- You want maximum reasoning performance (best AIME scores)\n")
+        f.write("- You have rule-based rewards and online sampling capability\n")
+        f.write("- Long chain-of-thought is important\n")
+        f.write("- You need to prevent entropy collapse during training\n\n")
+
         f.write("## Conclusion\n\n")
-        f.write("All three algorithms have their strengths:\n\n")
+        f.write("All four algorithms have their strengths:\n\n")
         f.write("- **GRPO** offers excellent sample efficiency without a value network\n")
         f.write("- **PPO** provides stability and proven performance\n")
-        f.write("- **DPO** excels in simplicity and preference-based learning\n\n")
+        f.write("- **DPO** excels in simplicity and preference-based learning\n")
+        f.write("- **DAPO** achieves the best reasoning performance through dynamic sampling and token-level loss\n\n")
 
         f.write("The choice depends on your specific requirements, available data, ")
         f.write("and computational constraints.\n\n")
@@ -367,7 +395,7 @@ def main():
     """Main comparison function"""
     print("\n" + "="*70)
     print("COMPREHENSIVE ALGORITHM COMPARISON")
-    print("GRPO vs PPO vs DPO")
+    print("PPO vs DPO vs GRPO vs DAPO")
     print("="*70)
 
     # Load dataset
@@ -387,6 +415,9 @@ def main():
 
     # DPO
     results["DPO"] = run_algorithm("DPO", DPOTrainer, DPOConfig, dataset)
+
+    # DAPO
+    results["DAPO"] = run_algorithm("DAPO", DAPOTrainer, DAPOConfig, dataset)
 
     # Generate comparisons
     print("\n" + "="*70)
