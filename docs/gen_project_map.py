@@ -38,7 +38,7 @@ ax.text(10, 10.7, 'PPO / DPO / GRPO / DAPO  —  RL Algorithms for LLM Training'
         fontsize=16, color='#6B7280')
 
 # Root box
-draw_box(ax, 7.5, 9.5, 5, 0.9, 'deepseek_r1_qwen2-1.5b/\n(Project Root)', C_ROOT, fontsize=16)
+draw_box(ax, 7.5, 9.5, 5, 0.9, 'PPOvDPOvGRPOvDAPO/\n(Project Root)', C_ROOT, fontsize=16)
 
 # Level 1 boxes - wider and taller
 draw_box(ax, 0.5, 7.2, 4.2, 0.9, 'algorithms/\n4 Algorithm Trainers', C_ALGO, fontsize=14)

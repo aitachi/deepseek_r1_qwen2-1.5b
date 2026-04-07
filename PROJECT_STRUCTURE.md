@@ -3,7 +3,7 @@
 ## 核心目录说明
 
 ```
-PPOvsDPOvsGRPOvsDAPO/
+PPOvDPOvGRPOvDAPO/
 │
 ├── README.md                          # 英文项目文档
 ├── README_CN.md                       # 中文项目文档
@@ -158,7 +158,7 @@ run_comparison.py
 
 **作者:** Aitachi
 **邮箱:** 44158892@qq.com
-**GitHub:** https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO
+**GitHub:** https://github.com/aitachi/PPOvDPOvGRPOvDAPO
 
 ---
 

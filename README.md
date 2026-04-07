@@ -461,7 +461,7 @@ PPO (2017)  ──→  DPO (2023)  : 消除奖励模型，闭式损失
   author = {Aitachi},
   title = {PPO vs DPO vs GRPO vs DAPO: Complete Implementation and Comparison},
   year = {2025},
-  url = {https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO},
+  url = {https://github.com/aitachi/PPOvDPOvGRPOvDAPO},
   email = {44158892@qq.com}
 }
 ```

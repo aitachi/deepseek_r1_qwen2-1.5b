@@ -109,8 +109,8 @@
 
 ### 步骤 1: 克隆仓库
 ```bash
-git clone https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO.git
-cd PPOvsDPOvsGRPOvsDAPO
+git clone https://github.com/aitachi/PPOvDPOvGRPOvDAPO.git
+cd PPOvDPOvGRPOvDAPO
 ```
 
 ### 步骤 2: 安装依赖
@@ -248,7 +248,7 @@ trainer.train(dataset)
 ## 📁 项目结构
 
 ```
-PPOvsDPOvsGRPOvsDAPO/
+PPOvDPOvGRPOvDAPO/
 │
 ├── algorithms/                    # 算法实现
 │   ├── ppo_trainer.py            # PPO 实现
@@ -441,7 +441,7 @@ L_DPO(π_θ; π_ref) = -E_{(x,y_w,y_l)~D}[
   author = {Aitachi},
   title = {PPO, DPO, GRPO, and DAPO: Complete Implementation and Comparison},
   year = {2025},
-  url = {https://github.com/aitachi/PPOvsDPOvsGRPOvsDAPO},
+  url = {https://github.com/aitachi/PPOvDPOvGRPOvDAPO},
   email = {44158892@qq.com}
 }
 ```

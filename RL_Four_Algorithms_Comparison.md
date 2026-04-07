@@ -509,6 +509,6 @@ PPO (2017)                         # 业界标准 RL 算法
 
 ---
 
-**作者:** Aitachi | **邮箱:** 44158892@qq.com | **GitHub:** https://github.com/aitachi/deepseek_r1_qwen2-1.5b
+**作者:** Aitachi | **邮箱:** 44158892@qq.com | **GitHub:** https://github.com/aitachi/PPOvDPOvGRPOvDAPO
 
 **最后更新:** 2025-01 | **版本:** 1.0.0

@@ -183,4 +183,4 @@ PPO (2017)  →  DPO (2023)  →  GRPO (2025)  →  DAPO (2025)
 ---
 
 *文档生成时间: 2025*
-*项目地址: [deepseek_r1_qwen2-1.5b](https://github.com/aitachi/deepseek_r1_qwen2-1.5b)*
+*项目地址: [PPOvDPOvGRPOvDAPO](https://github.com/aitachi/PPOvDPOvGRPOvDAPO)*

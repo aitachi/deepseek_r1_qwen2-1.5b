@@ -1,4 +1,4 @@
-# deepseek_r1_qwen2-1.5b
+# PPOvDPOvGRPOvDAPO
 **对比 DeepSeek-R1 论文流程与 代码复现的实现差异分析报告**
 
 **1. 引言**
