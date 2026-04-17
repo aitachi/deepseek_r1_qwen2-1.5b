@@ -129,7 +129,7 @@ $$\mathrm{clip}(r_t,\ 1-\varepsilon_{\mathrm{low}},\ 1+\varepsilon_{\mathrm{high
 
 #### イノベーション2：動的サンプリング
 
-$$0 < \left\lvert \left\{o_i : \mathrm{correct}(o_i)\right\}\right\rvert < G$$
+$$0 < n_c < G$$
 
 #### イノベーション3：トークンレベル損失正規化
 

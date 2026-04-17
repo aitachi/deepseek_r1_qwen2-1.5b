@@ -172,7 +172,7 @@ $$h(y_w,y_l,x) = \log\frac{\pi_\theta(y_w \mid x)}{\pi_{\mathrm{ref}}(y_w \mid x
 
 where $y_w$ and $y_l$ are the preferred and rejected responses in a preference pair. $\sigma$ is the sigmoid function, and $\beta$ controls the sharpness of preference distinction.
 
-Implicit reward: $\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y \mid x)}{\pi_{\mathrm{ref}}(y \mid x)}$
+Implicit reward: $\hat{r}(x,y) = \beta \cdot \left(\log \pi_\theta(y \mid x) - \log \pi_{\mathrm{ref}}(y \mid x)\right)$
 
 ![DPO Flow](docs/figures/dpo_flowchart.svg)
 
@@ -226,11 +226,11 @@ The upper bound is expanded by 40% (0.28 vs 0.20), allowing tokens with positive
 
 #### Innovation 2: Dynamic Sampling
 
-When all $G$ responses for a prompt are either entirely correct or entirely incorrect, the advantage is zero and the gradient is无效. DAPO filters these batches:
+When all $G$ responses for a prompt are either entirely correct or entirely incorrect, the advantage is zero and the gradient is invalid. DAPO filters these batches:
 
-**Filtering condition:** the number of correct responses must be strictly between 0 and $G$:
+**Filtering condition:** let $n_c = \sum_{i=1}^{G} \mathbf{1}[\mathrm{correct}(o_i)]$, then:
 
-$$0 < \left\lvert \left\{o_i : \mathrm{correct}(o_i)\right\}\right\rvert < G$$
+$$0 < n_c < G$$
 
 This guarantees that every training batch has non-zero advantage and valid gradient updates.
 
@@ -288,7 +288,7 @@ $$R_{\mathrm{length}}(y) = \begin{cases} 0 & \lvert y\rvert \leq L_{\max} - L_{\
 |:---|:---|:---|
 | Clipping Range | $[1-\varepsilon,\, 1+\varepsilon]$ symmetric | $[1-\varepsilon_l,\, 1+\varepsilon_h]$ asymmetric |
 | Loss Normalization | $\frac{1}{G}\sum_i$ (sample-level) | $\frac{1}{\sum_i \lvert o_i\rvert}\sum_i\sum_t$ (token-level) |
-| Batch Filtering | None (fixed G=16) | Dynamic ($0 < \mathrm{correct} < G$) |
+| Batch Filtering | None (fixed G=16) | Dynamic ($0 < n_c < G$) |
 | KL Penalty | $\beta D_{\mathrm{KL}}$ (explicit) | Removed (Clip-Higher suffices) |
 
 ### 4.4 Algorithm Evolution Trajectory
@@ -449,28 +449,82 @@ cd docs && python generate_all_figures.py
 
 ## 9. References
 
-1. Schulman, J., et al. "Proximal Policy Optimization Algorithms." arXiv:1707.06347, 2017.
-2. Schulman, J., et al. "High-Dimensional Continuous Control Using Generalized Advantage Estimation." ICLR 2016.
-3. Rafailov, R., et al. "Direct Preference Optimization: Your Language Model is Secretly a Reward Model." NeurIPS 2023.
-4. DeepSeek-AI. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948, 2025.
-5. Yu, Q., et al. "DAPO: An Open-Source LLM Reinforcement Learning System." arXiv:2503.14476, 2025.
-6. Ouyang, L., et al. "Training Language Models to Follow Instructions with Human Feedback." NeurIPS 2022.
-7. Christiano, P. F., et al. "Deep Reinforcement Learning from Human Preferences." NeurIPS 2017.
-8. Ethayarajh, K., et al. "KTO: Model Alignment as Prospect Theoretic Optimization." arXiv:2402.01306, 2024.
-9. Azar, M. G., et al. "A General Theoretical Paradigm to Understand Learning from Human Preferences." AISTATS 2024.
-10. Gao, L., et al. "Scaling Laws for Reward Model Overoptimization." ICML 2023.
-11. Lightman, H., et al. "Let's Verify Step by Step." ICLR 2024.
-12. Snell, C., et al. "Scaling LLM Test-Time Compute Optimally Can be More Effective than Scaling Model Parameters." arXiv:2408.03314, 2024.
-13. Guo, Z., et al. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300, 2024.
-14. Yang, A., et al. "Qwen2.5 Technical Report." arXiv:2412.15115, 2024.
+[1] J. Schulman et al., "Proximal policy optimization algorithms," arXiv:1707.06347, 2017.
+
+[2] J. Schulman et al., "High-dimensional continuous control using generalized advantage estimation," in Proc. ICLR, 2016.
+
+[3] R. Rafailov, A. Sharma, E. Mitchell, S. Ermon, C. D. Manning, and C. Finn, "Direct preference optimization: Your language model is secretly a reward model," in Proc. NeurIPS, 2023.
+
+[4] DeepSeek-AI, "DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning," arXiv:2501.12948, 2025.
+
+[5] Q. Yu et al., "DAPO: An open-source LLM reinforcement learning system," arXiv:2503.14476, 2025.
+
+[6] L. Ouyang et al., "Training language models to follow instructions with human feedback," in Proc. NeurIPS, 2022.
+
+[7] P. F. Christiano et al., "Deep reinforcement learning from human preferences," in Proc. NeurIPS, 2017.
+
+[8] K. Ethayarajh et al., "KTO: Model alignment as prospect theoretic optimization," arXiv:2402.01306, 2024.
+
+[9] M. G. Azar et al., "A general theoretical paradigm to understand learning from human preferences," in Proc. AISTATS, 2024.
+
+[10] L. Gao, J. Schulman, and J. Hilton, "Scaling laws for reward model overoptimization," in Proc. ICML, 2023.
+
+[11] H. Lightman et al., "Let's verify step by step," in Proc. ICLR, 2024.
+
+[12] C. Snell et al., "Scaling LLM test-time compute optimally can be more effective than scaling model parameters," arXiv:2408.03314, 2024.
+
+[13] Z. Guo et al., "DeepSeekMath: Pushing the limits of mathematical reasoning in open language models," arXiv:2402.03300, 2024.
+
+[14] A. Yang et al., "Qwen2.5 technical report," arXiv:2412.15115, 2024.
+
+[15] D. M. Ziegler et al., "Fine-tuning language models from human preferences," arXiv:1909.08593, 2019.
+
+[16] N. Stiennon et al., "Learning to summarize with human feedback," in Proc. NeurIPS, vol. 33, pp. 3008–3021, 2020.
+
+[17] Y. Bai et al., "Constitutional AI: Harmlessness from AI feedback," arXiv:2212.08073, 2022.
+
+[18] A. Glaese et al., "Improving alignment of dialogue agents via targeted human judgements," arXiv:2209.14375, 2022.
+
+[19] J. Wei et al., "Chain-of-thought prompting elicits reasoning in large language models," in Proc. NeurIPS, vol. 35, 2022.
+
+[20] S. Yao et al., "Tree of thoughts: Deliberate problem solving with large language models," in Proc. NeurIPS, 2023.
+
+[21] N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao, "Reflexion: Language agents with verbal reinforcement learning," in Proc. NeurIPS, 2023.
+
+[22] K. Cobbe et al., "Training verifiers to solve math word problems," arXiv:2110.14168, 2021.
+
+[23] D. Hendrycks et al., "Measuring mathematical problem solving with the MATH dataset," in Proc. NeurIPS, vol. 34, 2021.
+
+[24] J. Schulman et al., "Trust region policy optimization," in Proc. ICML, 2015.
+
+[25] R. J. Williams, "Simple statistical gradient-following algorithms for connectionist reinforcement learning," Mach. Learn., vol. 8, no. 3–4, pp. 229–256, 1992.
+
+[26] H. Lee, S. Phatale, H. Mansoor, K. Lu, T. Mesnard, J. Ferret, and C. Bishop, "RLAIF: Scaling reinforcement learning from human feedback with AI feedback," arXiv:2309.00267, 2023.
+
+[27] J. Uesato et al., "Solving math word problems with process- and outcome-based feedback," arXiv:2211.14275, 2022.
+
+[28] E. Zelikman, Y. Wu, J. Mu, and N. D. Goodman, "STaR: Bootstrapping reasoning with reasoning," in Proc. NeurIPS, vol. 35, 2022.
+
+[29] W. Yuan, R. Y. Pang et al., "Self-rewarding language models," in Proc. ICML, 2024.
+
+[30] Y. Wu, Z. Sun, H. Yuan, K. Ji, Y. Yang, and Q. Gu, "Self-play preference optimization for language model alignment," arXiv:2405.00675, 2024.
+
+[31] C. Rosset et al., "Direct Nash optimization: Teaching language models to self-improve with general preferences," arXiv:2404.03715, 2024.
+
+[32] N. Lambert et al., "RewardBench: Evaluating reward models for language modeling," arXiv:2403.13787, 2024.
+
+[33] A. Kumar et al., "Training language models to self-correct via reinforcement learning," arXiv:2409.12917, 2024.
+
+[34] Y. Meng, M. Xia, and D. Chen, "SimPO: Simple preference optimization with a reference-free reward," in Proc. NeurIPS, 2024.
+
+[35] Z. Li et al., "ReMax: A simple, effective, and efficient reinforcement learning method for aligning large language models," in Proc. ICML, 2024.
 
 ```bibtex
 @software{aitachi2025rl_comparison,
   author = {Aitachi},
-  title = {PPO vs DPO vs GRPO vs DAPO: A Comparative Study of RL Algorithms for LLM Training},
+  title = {PPO / DPO / GRPO / DAPO: A Comparative Study of RL Algorithms for LLM Training},
   year = {2025},
-  url = {https://github.com/aitachi/PPOvDPOvGRPOvDAPO},
-  email = {44158892@qq.com}
+  url = {https://github.com/aitachi/PPOvDPOvGRPOvDAPO}
 }
 ```
 
