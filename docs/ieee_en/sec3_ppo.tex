@@ -1,0 +1,68 @@
+% Section 3: PPO
+\section{Proximal Policy Optimization (PPO)}
+\label{sec:ppo}
+
+\subsection{Algorithm Overview and Motivation}
+
+PPO~\cite{schulman2017ppo}, proposed by Schulman et al.\ in 2017, remains the most widely adopted RL algorithm for LLM alignment. It was the primary algorithm behind InstructGPT~\cite{ouyang2022instructgpt} and early versions of ChatGPT. PPO builds upon the policy gradient framework with a clipped surrogate objective that constrains policy updates to a trust region, preventing destructively large updates while maintaining sample efficiency.
+
+The key insight behind PPO is that vanilla policy gradient methods suffer from high variance and unstable updates. Trust Region Policy Optimization (TRPO) addressed this with a hard KL constraint, but its second-order optimization is computationally expensive. PPO achieves similar stability with first-order optimization by clipping the probability ratio.
+
+\subsection{Clipped Surrogate Objective}
+
+The core PPO objective is the clipped surrogate function. Let $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$ denote the probability ratio between the current and old policies. The clipped objective is:
+\begin{equation}
+L^{\text{CLIP}}(\theta) = \E_t\!\left[\min\!\left(r_t(\theta)\hat{A}_t,\ \text{clip}(r_t(\theta), 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_t\right)\right]
+\label{eq:ppo_clip}
+\end{equation}
+where $\varepsilon$ is a hyperparameter (typically 0.2) controlling the clipping range.
+
+\textbf{Interpretation:} When the advantage $\hat{A}_t > 0$ (the action was better than expected), the objective encourages increasing $r_t$ but clips it at $1 + \varepsilon$, preventing excessive policy updates. When $\hat{A}_t < 0$, it discourages the action but clips $r_t$ at $1 - \varepsilon$. This creates a ``flat'' region in the objective that provides robustness to large, potentially catastrophic updates.
+
+\subsection{Value Function and Entropy Bonus}
+
+PPO maintains a separate value network $V_\phi(s)$ to estimate expected returns. The value function loss uses a mean-squared error objective:
+\begin{equation}
+L^{VF}(\phi) = \E_t\left[\left(V_\phi(s_t) - \hat{V}_t^{\text{targ}}\right)^2\right]
+\end{equation}
+where $\hat{V}_t^{\text{targ}}$ is the target value computed from discounted returns.
+
+To encourage exploration and prevent premature convergence to deterministic policies, PPO adds an entropy bonus:
+\begin{equation}
+S[\pi_\theta](s_t) = -\sum_{a} \pi_\theta(a|s_t)\log\pi_\theta(a|s_t)
+\end{equation}
+
+\subsection{Combined PPO Objective}
+
+The full PPO objective combines all three components:
+\begin{equation}
+\boxed{L^{\text{PPO}}(\theta, \phi) = \E_t\left[L^{\text{CLIP}}(\theta) - c_1 L^{VF}(\phi) + c_2 S[\pi_\theta]\right]}
+\label{eq:ppo}
+\end{equation}
+where $c_1 = 0.5$ and $c_2 = 0.01$ are typical coefficient values. The expectation is taken over a batch of trajectories collected by the current policy.
+
+\subsection{Generalized Advantage Estimation (GAE)}
+
+The advantage function $\hat{A}_t$ is estimated using GAE~\cite{schulman2016gae}, which provides a bias-variance trade-off controlled by the parameter $\lambda$:
+\begin{equation}
+\hat{A}_t^{\text{GAE}} = \sum_{l=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^{V}
+\end{equation}
+where $\delta_t^{V} = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)$ is the temporal difference (TD) error. When $\lambda = 0$, GAE reduces to the one-step TD error (low variance, high bias); when $\lambda = 1$, it reduces to Monte Carlo returns (low bias, high variance).
+
+\subsection{Architectural Requirements}
+
+PPO requires \textbf{four model components} to be simultaneously loaded into GPU memory:
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item \textbf{Actor} (policy $\pi_\theta$): The LLM being trained.
+\item \textbf{Critic} (value $V_\phi$): A separate network of comparable size to the Actor.
+\item \textbf{Reference Model} ($\pi_{\text{ref}}$): Frozen copy for KL computation (optional but common in RLHF).
+\item \textbf{Reward Model} ($r_\psi$): The trained reward function.
+\end{enumerate}
+
+This makes PPO the most memory-intensive algorithm, requiring approximately $4\times$ the memory of a single LLM forward pass. For a 7B parameter model, this typically requires 4--8 A100 GPUs with model parallelism.
+
+\subsection{Strengths and Limitations}
+
+\textbf{Strengths:} Well-understood convergence properties; robust to hyperparameter choices; compatible with any reward function; strong theoretical foundation from policy gradient theory.
+
+\textbf{Limitations:} High memory overhead from the value network; training instability when the reward signal is sparse or noisy; requires careful reward model training; the value network adds significant engineering complexity.

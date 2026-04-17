@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1144.8pt" height="424.8pt" viewBox="0 0 1144.8 424.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-04-17T11:17:49.554365</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 424.8 
+L 1144.8 424.8 
+L 1144.8 0 
+L 0 0 
+z
+" style="fill: #f8f9fa"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 58.250323 289.35 
+L 204.108387 289.35 
+Q 207.754839 289.35 207.754839 284.22 
+L 207.754839 130.32 
+Q 207.754839 125.19 204.108387 125.19 
+L 58.250323 125.19 
+Q 54.603871 125.19 54.603871 130.32 
+L 54.603871 284.22 
+Q 54.603871 289.35 58.250323 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #34495e; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 240.572903 289.35 
+L 386.430968 289.35 
+Q 390.077419 289.35 390.077419 284.22 
+L 390.077419 130.32 
+Q 390.077419 125.19 386.430968 125.19 
+L 240.572903 125.19 
+Q 236.926452 125.19 236.926452 130.32 
+L 236.926452 284.22 
+Q 236.926452 289.35 240.572903 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #3498db; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 422.895484 289.35 
+L 568.753548 289.35 
+Q 572.4 289.35 572.4 284.22 
+L 572.4 130.32 
+Q 572.4 125.19 568.753548 125.19 
+L 422.895484 125.19 
+Q 419.249032 125.19 419.249032 130.32 
+L 419.249032 284.22 
+Q 419.249032 289.35 422.895484 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #2980b9; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 605.218065 289.35 
+L 751.076129 289.35 
+Q 754.722581 289.35 754.722581 284.22 
+L 754.722581 130.32 
+Q 754.722581 125.19 751.076129 125.19 
+L 605.218065 125.19 
+Q 601.571613 125.19 601.571613 130.32 
+L 601.571613 284.22 
+Q 601.571613 289.35 605.218065 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #e67e22; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 787.540645 289.35 
+L 933.39871 289.35 
+Q 937.045161 289.35 937.045161 284.22 
+L 937.045161 130.32 
+Q 937.045161 125.19 933.39871 125.19 
+L 787.540645 125.19 
+Q 783.894194 125.19 783.894194 130.32 
+L 783.894194 284.22 
+Q 783.894194 289.35 787.540645 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #16a085; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 969.863226 289.35 
+L 1115.72129 289.35 
+Q 1119.367742 289.35 1119.367742 284.22 
+L 1119.367742 130.32 
+Q 1119.367742 125.19 1115.72129 125.19 
+L 969.863226 125.19 
+Q 966.216774 125.19 966.216774 130.32 
+L 966.216774 284.22 
+Q 966.216774 289.35 969.863226 289.35 
+z
+" clip-path="url(#p4cc3a36c0f)" style="fill: #c0392b; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #2c3e50" x="572.4" y="37.98" transform="rotate(-0 572.4 37.98)">PPO Data Processing Pipeline / PPO 数据处理流程</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(116.179355 201.814922)">Training</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(123.679355 208.939922)">Data</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(116.179355 216.943828)">训练数据</text>
+   </g>
+   <g id="text_3">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="131.179355" y="325.26" transform="rotate(-0 131.179355 325.26)">List[Dict]</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 206.106101 207.27 
+Q 207.754384 207.27 207.166599 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 203.166599 205.27 
+L 207.166599 207.27 
+L 203.166599 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(302.251935 201.762187)">Prompt</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(296.626935 208.887187)">Selection</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(298.501935 216.996562)">提示选择</text>
+   </g>
+   <g id="text_5">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="313.501935" y="325.26" transform="rotate(-0 313.501935 325.26)">q_i</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 388.428682 207.27 
+Q 390.076965 207.27 389.489179 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 385.489179 205.27 
+L 389.489179 207.27 
+L 385.489179 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(480.824516 201.744609)">Response</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(477.074516 208.869609)">Generation</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(480.824516 217.014141)">响应生成</text>
+   </g>
+   <g id="text_7">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="495.824516" y="325.26" transform="rotate(-0 495.824516 325.26)">o ~ pi</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 570.751263 207.27 
+Q 572.399545 207.27 571.81176 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 567.81176 205.27 
+L 571.81176 207.27 
+L 567.81176 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(666.897097 201.674297)">Reward</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(657.522097 208.869609)">Computation</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(663.147097 217.084453)">奖励计算</text>
+   </g>
+   <g id="text_9">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="678.147097" y="325.26" transform="rotate(-0 678.147097 325.26)">r=R(q,o)</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 753.073843 207.27 
+Q 754.722126 207.27 754.134341 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 750.134341 205.27 
+L 754.134341 207.27 
+L 750.134341 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(854.844677 201.674297)">GAE</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(839.844677 208.869609)">Computation</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(847.344677 217.084453)">GAE计算</text>
+   </g>
+   <g id="text_11">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="860.469677" y="325.26" transform="rotate(-0 860.469677 325.26)">A_t, R_t</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 935.396424 207.27 
+Q 937.044707 207.27 936.456921 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 932.456921 205.27 
+L 936.456921 207.27 
+L 932.456921 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1031.542258 201.691875)">Policy</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1031.542258 208.816875)">Update</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1027.792258 217.066875)">策略更新</text>
+   </g>
+   <g id="text_13">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="1042.792258" y="325.26" transform="rotate(-0 1042.792258 325.26)">theta update</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p4cc3a36c0f">
+   <rect x="7.2" y="7.2" width="1130.4" height="410.4"/>
+  </clipPath>
+ </defs>
+</svg>

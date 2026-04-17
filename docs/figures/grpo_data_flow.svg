@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1144.8pt" height="424.8pt" viewBox="0 0 1144.8 424.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-04-17T11:17:50.178126</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 424.8 
+L 1144.8 424.8 
+L 1144.8 0 
+L 0 0 
+z
+" style="fill: #f8f9fa"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 51.16 289.35 
+L 176.76 289.35 
+Q 179.9 289.35 179.9 284.22 
+L 179.9 130.32 
+Q 179.9 125.19 176.76 125.19 
+L 51.16 125.19 
+Q 48.02 125.19 48.02 130.32 
+L 48.02 284.22 
+Q 48.02 289.35 51.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #34495e; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 208.16 289.35 
+L 333.76 289.35 
+Q 336.9 289.35 336.9 284.22 
+L 336.9 130.32 
+Q 336.9 125.19 333.76 125.19 
+L 208.16 125.19 
+Q 205.02 125.19 205.02 130.32 
+L 205.02 284.22 
+Q 205.02 289.35 208.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #27ae60; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 365.16 289.35 
+L 490.76 289.35 
+Q 493.9 289.35 493.9 284.22 
+L 493.9 130.32 
+Q 493.9 125.19 490.76 125.19 
+L 365.16 125.19 
+Q 362.02 125.19 362.02 130.32 
+L 362.02 284.22 
+Q 362.02 289.35 365.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #e67e22; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 522.16 289.35 
+L 647.76 289.35 
+Q 650.9 289.35 650.9 284.22 
+L 650.9 130.32 
+Q 650.9 125.19 647.76 125.19 
+L 522.16 125.19 
+Q 519.02 125.19 519.02 130.32 
+L 519.02 284.22 
+Q 519.02 289.35 522.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #16a085; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 679.16 289.35 
+L 804.76 289.35 
+Q 807.9 289.35 807.9 284.22 
+L 807.9 130.32 
+Q 807.9 125.19 804.76 125.19 
+L 679.16 125.19 
+Q 676.02 125.19 676.02 130.32 
+L 676.02 284.22 
+Q 676.02 289.35 679.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #c0392b; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 836.16 289.35 
+L 961.76 289.35 
+Q 964.9 289.35 964.9 284.22 
+L 964.9 130.32 
+Q 964.9 125.19 961.76 125.19 
+L 836.16 125.19 
+Q 833.02 125.19 833.02 130.32 
+L 833.02 284.22 
+Q 833.02 289.35 836.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #8e44ad; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 993.16 289.35 
+L 1118.76 289.35 
+Q 1121.9 289.35 1121.9 284.22 
+L 1121.9 130.32 
+Q 1121.9 125.19 1118.76 125.19 
+L 993.16 125.19 
+Q 990.02 125.19 990.02 130.32 
+L 990.02 284.22 
+Q 990.02 289.35 993.16 289.35 
+z
+" clip-path="url(#pcbee0eb2a4)" style="fill: #2c3e50; opacity: 0.85; stroke: #2c3e50; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #2c3e50" x="572.4" y="37.98" transform="rotate(-0 572.4 37.98)">GRPO Data Processing Pipeline / GRPO 数据处理流程</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(98.96 201.814922)">Training</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(106.46 208.939922)">Data</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(98.96 216.943828)">训练数据</text>
+   </g>
+   <g id="text_3">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="113.96" y="325.26" transform="rotate(-0 113.96 325.26)">List[Dict]</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 178.762363 207.27 
+Q 179.900699 207.27 178.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 174.802967 205.27 
+L 178.802967 207.27 
+L 174.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(261.585 201.809062)">Group</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(252.21 208.934062)">Generation</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(259.71 217.008281)">组生成</text>
+   </g>
+   <g id="text_5">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="270.96" y="325.26" transform="rotate(-0 270.96 325.26)">{o1..oG}</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 335.762363 207.27 
+Q 336.900699 207.27 335.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 331.802967 205.27 
+L 335.802967 207.27 
+L 331.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(416.71 201.744609)">Reward</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(418.585 208.939922)">Array</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(412.96 217.014141)">奖励数组</text>
+   </g>
+   <g id="text_7">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="427.96" y="325.26" transform="rotate(-0 427.96 325.26)">[r1..rG]</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 492.762363 207.27 
+Q 493.900699 207.27 492.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 488.802967 205.27 
+L 492.802967 207.27 
+L 488.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(575.585 201.949687)">Group</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(568.085 209.074687)">Normalize</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(569.96 216.867656)">组归一化</text>
+   </g>
+   <g id="text_9">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="584.96" y="325.26" transform="rotate(-0 584.96 325.26)">A_i</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 649.762363 207.27 
+Q 650.900699 207.27 649.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 645.802967 205.27 
+L 649.802967 207.27 
+L 645.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(728.835 201.686016)">Clipped</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(725.085 208.881328)">Objective</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(726.96 217.131328)">裁剪目标</text>
+   </g>
+   <g id="text_11">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="741.96" y="325.26" transform="rotate(-0 741.96 325.26)">L_clip</text>
+   </g>
+   <g id="patch_13">
+    <path d="M 806.762363 207.27 
+Q 807.900699 207.27 806.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 802.802967 205.27 
+L 806.802967 207.27 
+L 802.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(895.21 201.744609)">KL</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(885.835 208.869609)">Penalty</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(887.71 217.014141)">KL惩罚</text>
+   </g>
+   <g id="text_13">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="898.96" y="325.26" transform="rotate(-0 898.96 325.26)">+beta*KL</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 963.762363 207.27 
+Q 964.900699 207.27 963.802967 207.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 959.802967 205.27 
+L 963.802967 207.27 
+L 959.802967 209.27 
+" style="fill: none; stroke: #2c3e50; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1044.71 201.691875)">Policy</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1044.71 208.816875)">Update</text>
+    <text style="font-weight: 700; font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(1040.96 217.066875)">策略更新</text>
+   </g>
+   <g id="text_15">
+    <text style="font-style: italic; font-size: 6px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="1055.96" y="325.26" transform="rotate(-0 1055.96 325.26)">theta update</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pcbee0eb2a4">
+   <rect x="7.2" y="7.2" width="1130.4" height="410.4"/>
+  </clipPath>
+ </defs>
+</svg>

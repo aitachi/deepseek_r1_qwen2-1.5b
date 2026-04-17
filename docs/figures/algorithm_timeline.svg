@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="189538.285263pt" height="457.92pt" viewBox="0 0 189538.285263 457.92" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-04-17T11:18:42.026588</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 457.92 
+L 189538.285263 457.92 
+L 189538.285263 0 
+L 0 0 
+z
+" style="fill: #f5f7fa"/>
+  </g>
+  <g id="axes_1">
+   <g id="line2d_1">
+    <path d="M 188685.274737 228.96 
+L 189512.289474 228.96 
+" clip-path="url(#p0f28ea7601)" style="fill: none; stroke: #bdc3c7; stroke-width: 3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_2">
+    <path d="M 188591.295789 228.96 
+L 188779.253684 228.96 
+Q 188788.651579 228.96 188788.651579 221.568 
+L 188788.651579 88.512 
+Q 188788.651579 81.12 188779.253684 81.12 
+L 188591.295789 81.12 
+Q 188581.897895 81.12 188581.897895 88.512 
+L 188581.897895 221.568 
+Q 188581.897895 228.96 188591.295789 228.96 
+z
+" clip-path="url(#p0f28ea7601)" style="fill: #3498db; opacity: 0.9; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 188779.253684 391.584 
+L 188967.211579 391.584 
+Q 188976.609474 391.584 188976.609474 384.192 
+L 188976.609474 251.136 
+Q 188976.609474 243.744 188967.211579 243.744 
+L 188779.253684 243.744 
+Q 188769.855789 243.744 188769.855789 251.136 
+L 188769.855789 384.192 
+Q 188769.855789 391.584 188779.253684 391.584 
+z
+" clip-path="url(#p0f28ea7601)" style="fill: #e67e22; opacity: 0.9; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 189155.169474 228.96 
+L 189343.127368 228.96 
+Q 189352.525263 228.96 189352.525263 221.568 
+L 189352.525263 88.512 
+Q 189352.525263 81.12 189343.127368 81.12 
+L 189155.169474 81.12 
+Q 189145.771579 81.12 189145.771579 88.512 
+L 189145.771579 221.568 
+Q 189145.771579 228.96 189155.169474 228.96 
+z
+" clip-path="url(#p0f28ea7601)" style="fill: #e74c3c; opacity: 0.9; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 189343.127368 391.584 
+L 189531.085263 391.584 
+Q 189540.483158 391.584 189540.483158 384.192 
+L 189540.483158 251.136 
+Q 189540.483158 243.744 189531.085263 243.744 
+L 189343.127368 243.744 
+Q 189333.729474 243.744 189333.729474 251.136 
+L 189333.729474 384.192 
+Q 189333.729474 391.584 189343.127368 391.584 
+z
+" clip-path="url(#p0f28ea7601)" style="fill: #27ae60; opacity: 0.9; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 189390.116842 228.96 
+L 189578.074737 228.96 
+Q 189587.472632 228.96 189587.472632 221.568 
+L 189587.472632 88.512 
+Q 189587.472632 81.12 189578.074737 81.12 
+L 189390.116842 81.12 
+Q 189380.718947 81.12 189380.718947 88.512 
+L 189380.718947 221.568 
+Q 189380.718947 228.96 189390.116842 228.96 
+z
+" clip-path="url(#p0f28ea7601)" style="fill: #9b59b6; opacity: 0.9; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 18px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #2c3e50" x="191.7" y="29.376" transform="rotate(-0 191.7 29.376)">RL for LLMs: Algorithm Evolution Timeline</text>
+   </g>
+   <g id="line2d_2">
+    <defs>
+     <path id="mde9bdbdcbe" d="M 0 8 
+C 2.121625 8 4.156639 7.15707 5.656854 5.656854 
+C 7.15707 4.156639 8 2.121625 8 0 
+C 8 -2.121625 7.15707 -4.156639 5.656854 -5.656854 
+C 4.156639 -7.15707 2.121625 -8 0 -8 
+C -2.121625 -8 -4.156639 -7.15707 -5.656854 -5.656854 
+C -7.15707 -4.156639 -8 -2.121625 -8 0 
+C -8 2.121625 -7.15707 4.156639 -5.656854 5.656854 
+C -4.156639 7.15707 -2.121625 8 0 8 
+z
+" style="stroke: #3498db"/>
+    </defs>
+    <g clip-path="url(#p0f28ea7601)">
+     <use xlink:href="#mde9bdbdcbe" x="188685.274737" y="228.96" style="fill: #3498db; stroke: #3498db"/>
+    </g>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(188677.024737 126.013956)">PPO</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(188638.524737 137.031144)">(Schulman et al.)</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188653.399737 182.802047)">Clipped surrogate</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188657.149737 190.442672)">+ Value network</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188675.899737 198.083297)">+ GAE</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 188685.274737 219.564797 
+Q 188685.274737 218.718398 188685.274737 219.549051 
+" style="fill: none; stroke: #3498db; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 188683.274737 223.549051 
+L 188685.274737 219.549051 
+L 188687.274737 223.549051 
+" style="fill: none; stroke: #3498db; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_3">
+    <defs>
+     <path id="m6227931da7" d="M 0 8 
+C 2.121625 8 4.156639 7.15707 5.656854 5.656854 
+C 7.15707 4.156639 8 2.121625 8 0 
+C 8 -2.121625 7.15707 -4.156639 5.656854 -5.656854 
+C 4.156639 -7.15707 2.121625 -8 0 -8 
+C -2.121625 -8 -4.156639 -7.15707 -5.656854 -5.656854 
+C -7.15707 -4.156639 -8 -2.121625 -8 0 
+C -8 2.121625 -7.15707 4.156639 -5.656854 5.656854 
+C -4.156639 7.15707 -2.121625 8 0 8 
+z
+" style="stroke: #e67e22"/>
+    </defs>
+    <g clip-path="url(#p0f28ea7601)">
+     <use xlink:href="#m6227931da7" x="188873.232632" y="228.96" style="fill: #e67e22; stroke: #e67e22"/>
+    </g>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(188862.232632 288.3028)">RLHF</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(188851.232632 299.9903)">(OpenAI)</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188850.732632 345.39675)">Reward model</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188845.107632 353.037375)">+ PPO fine-tune</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(188843.232632 360.678)">+ Human feedback</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 188873.232632 249.135504 
+Q 188873.232632 245.592354 188873.232632 243.726254 
+" style="fill: none; stroke: #e67e22; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 188871.232632 247.726254 
+L 188873.232632 243.726254 
+L 188875.232632 247.726254 
+" style="fill: none; stroke: #e67e22; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_4">
+    <defs>
+     <path id="m76af2ee613" d="M 0 8 
+C 2.121625 8 4.156639 7.15707 5.656854 5.656854 
+C 7.15707 4.156639 8 2.121625 8 0 
+C 8 -2.121625 7.15707 -4.156639 5.656854 -5.656854 
+C 4.156639 -7.15707 2.121625 -8 0 -8 
+C -2.121625 -8 -4.156639 -7.15707 -5.656854 -5.656854 
+C -7.15707 -4.156639 -8 -2.121625 -8 0 
+C -8 2.121625 -7.15707 4.156639 -5.656854 5.656854 
+C -4.156639 7.15707 -2.121625 8 0 8 
+z
+" style="stroke: #e74c3c"/>
+    </defs>
+    <g clip-path="url(#p0f28ea7601)">
+     <use xlink:href="#m76af2ee613" x="189249.148421" y="228.96" style="fill: #e74c3c; stroke: #e74c3c"/>
+    </g>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189240.898421 126.013956)">DPO</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189202.398421 137.031144)">(Rafailov et al.)</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189224.773421 182.734664)">Bradley-Terry</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189217.273421 190.375289)">+ No reward model</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189215.398421 198.092086)">+ Preference pairs</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 189249.148421 219.564797 
+Q 189249.148421 218.718398 189249.148421 219.549051 
+" style="fill: none; stroke: #e74c3c; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 189247.148421 223.549051 
+L 189249.148421 219.549051 
+L 189251.148421 223.549051 
+" style="fill: none; stroke: #e74c3c; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_5">
+    <defs>
+     <path id="m5271fd2ba8" d="M 0 8 
+C 2.121625 8 4.156639 7.15707 5.656854 5.656854 
+C 7.15707 4.156639 8 2.121625 8 0 
+C 8 -2.121625 7.15707 -4.156639 5.656854 -5.656854 
+C 4.156639 -7.15707 2.121625 -8 0 -8 
+C -2.121625 -8 -4.156639 -7.15707 -5.656854 -5.656854 
+C -7.15707 -4.156639 -8 -2.121625 -8 0 
+C -8 2.121625 -7.15707 4.156639 -5.656854 5.656854 
+C -4.156639 7.15707 -2.121625 8 0 8 
+z
+" style="stroke: #27ae60"/>
+    </defs>
+    <g clip-path="url(#p0f28ea7601)">
+     <use xlink:href="#m5271fd2ba8" x="189437.106316" y="228.96" style="fill: #27ae60; stroke: #27ae60"/>
+    </g>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189426.106316 288.3028)">GRPO</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189401.356316 299.9903)">(DeepSeek-R1)</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189408.981316 345.426047)">Group advantage</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189410.856316 353.066672)">+ No value net</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189414.606316 360.707297)">+ KL penalty</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 189437.106316 249.135504 
+Q 189437.106316 245.592354 189437.106316 243.726254 
+" style="fill: none; stroke: #27ae60; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 189435.106316 247.726254 
+L 189437.106316 243.726254 
+L 189439.106316 247.726254 
+" style="fill: none; stroke: #27ae60; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_6">
+    <defs>
+     <path id="m54ff2262b4" d="M 0 8 
+C 2.121625 8 4.156639 7.15707 5.656854 5.656854 
+C 7.15707 4.156639 8 2.121625 8 0 
+C 8 -2.121625 7.15707 -4.156639 5.656854 -5.656854 
+C 4.156639 -7.15707 2.121625 -8 0 -8 
+C -2.121625 -8 -4.156639 -7.15707 -5.656854 -5.656854 
+C -7.15707 -4.156639 -8 -2.121625 -8 0 
+C -8 2.121625 -7.15707 4.156639 -5.656854 5.656854 
+C -4.156639 7.15707 -2.121625 8 0 8 
+z
+" style="stroke: #9b59b6"/>
+    </defs>
+    <g clip-path="url(#p0f28ea7601)">
+     <use xlink:href="#m54ff2262b4" x="189484.095789" y="228.96" style="fill: #9b59b6; stroke: #9b59b6"/>
+    </g>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189473.095789 125.6788)">DAPO</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(189453.845789 137.3663)">(ByteDance)</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189454.095789 182.734664)">Dynamic sampling</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189450.345789 190.375289)">+ Token-level loss</text>
+    <text style="font-size: 7.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff; opacity: 0.9" transform="translate(189452.220789 198.092086)">+ Overlong filter</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 189484.095789 219.564797 
+Q 189484.095789 218.718398 189484.095789 219.549051 
+" style="fill: none; stroke: #9b59b6; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 189482.095789 223.549051 
+L 189484.095789 219.549051 
+L 189486.095789 223.549051 
+" style="fill: none; stroke: #9b59b6; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 188706.066661 228.96 
+Q 188779.25335 228.96 188851.322005 228.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+    <path d="M 188847.322005 226.96 
+L 188851.322005 228.96 
+L 188847.322005 230.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 188894.028858 228.96 
+Q 189061.191308 228.96 189227.235725 228.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+    <path d="M 189223.235725 226.96 
+L 189227.235725 228.96 
+L 189223.235725 230.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 188706.073114 228.96 
+Q 189061.190617 228.96 189415.190085 228.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+    <path d="M 189411.190085 226.96 
+L 189415.190085 228.96 
+L 189411.190085 230.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 189457.89824 228.96 
+Q 189460.59981 228.96 189462.183346 228.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+    <path d="M 189458.183346 226.96 
+L 189462.183346 228.96 
+L 189458.183346 230.96 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #bdc3c7; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="188685.274737" y="230.92875" transform="rotate(-0 188685.274737 230.92875)">2017</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="188873.232632" y="230.92875" transform="rotate(-0 188873.232632 230.92875)">2019</text>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="189249.148421" y="230.92875" transform="rotate(-0 189249.148421 230.92875)">2023</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="189437.106316" y="230.92875" transform="rotate(-0 189437.106316 230.92875)">2025</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="189484.095789" y="230.92875" transform="rotate(-0 189484.095789 230.92875)">2025.5</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p0f28ea7601">
+   <rect x="188638.285263" y="7.2" width="892.8" height="443.52"/>
+  </clipPath>
+ </defs>
+</svg>

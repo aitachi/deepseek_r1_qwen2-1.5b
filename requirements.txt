@@ -1,0 +1,28 @@
+# Core Deep Learning
+torch>=2.0.0
+transformers>=4.30.0
+datasets>=2.14.0
+accelerate>=0.20.0
+peft>=0.4.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Progress & Monitoring
+tqdm>=4.65.0
+psutil>=5.9.0
+gputil>=1.4.0
+
+# Utilities
+scikit-learn>=1.3.0
+scipy>=1.10.0
+regex>=2022.1.18
+
+# Optional: For better performance
+# bitsandbytes>=0.41.0  # 8-bit quantization
+# flash-attn>=2.0.0      # Faster attention
