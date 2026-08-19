@@ -1,0 +1,35 @@
+% 中文版 Section 1: 引言
+\begin{abstract}
+强化学习（RL）已成为对齐和增强大语言模型（LLM）的核心技术。本综述对四种主流RL算法进行了全面系统的分析：近端策略优化（PPO）、直接偏好优化（DPO）、组相对策略优化（GRPO）和动态优势策略优化（DAPO。我们为每个算法提供了严格的数学公式推导，比较了其架构设计和计算需求，并在数学推理基准（包括AIME 2024）上评估了其实证性能。分析揭示了从基于价值的方法（PPO）到基于分组的方法（GRPO/DAPO）的清晰演进轨迹。具体而言，DAPO通过三大创新——非对称Clip-Higher、动态采样和Token级损失归一化——在AIME 2024上达到50\%的准确率，较朴素GRPO实现67\%的相对提升。我们提供了实用的算法选择指南，并指出了未来研究的开放性挑战。据我们所知，这是首个在统一数学框架下对这四种算法进行并排实验评估的综述。
+\end{abstract}
+
+\begin{IEEEkeywords}
+强化学习，大语言模型，PPO，DPO，GRPO，DAPO，RLHF，对齐，数学推理
+\end{IEEEkeywords}
+
+%=============================================================
+\section{引言}
+\label{sec:intro}
+
+以GPT-4~\cite{achiam2023gpt4}、LLaMA~\cite{touvron2023llama}和Qwen2.5~\cite{yang2024qwen25}为代表的大语言模型（LLM）从根本上改变了自然语言处理领域，在数学推理、代码生成、科学分析和创意写作等方面展现了前所未有的能力。然而，仅通过大规模语料库上的下一词元预测训练的模型，其输出往往在有用性、安全性和事实准确性方面与人类偏好不一致。
+
+基于人类反馈的强化学习（RLHF）~\cite{christo2017deep, ouyang2022instructgpt}已成为弥合这一对齐差距的主流范式。标准RLHF流程包含三个阶段：（1）在高质示范数据上进行监督微调（SFT）；（2）基于人类偏好比较训练奖励模型（RM）；（3）使用训练好的奖励模型进行基于RL的策略优化。虽然阶段1和2相对标准化，但阶段3中RL算法的选择对训练稳定性、计算效率和最终模型性能具有深远影响。
+
+LLM训练中RL算法的演进正在急剧加速：
+
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+\item \textbf{PPO}~\cite{schulman2017ppo}（2017年）：基础性算法，需要策略网络（Actor）和价值网络（Critic）双网络架构。它是InstructGPT~\cite{ouyang2022instructgpt}和ChatGPT背后的核心算法，但双网络架构需要大量GPU内存。
+\item \textbf{DPO}~\cite{rafailov2023dpo}（2023年）：范式转变，通过从偏好对推导闭式损失函数消除了显式奖励建模。DPO简化了训练流程，但需要预先收集的偏好数据。
+\item \textbf{GRPO}~\cite{deepseek2025r1, shao2024deepseekmath}（2025年）：由DeepSeek团队提出，通过使用组级奖励统计作为优势基线消除了价值网络，GPU内存减少约50\%。
+\item \textbf{DAPO}~\cite{yu2025dapo}（2025年）：由字节跳动提出，通过三大创新扩展GRPO——非对称Clip-Higher、动态采样和Token级损失，在AIME 2024上达到50\%的准确率。
+\end{itemize}
+
+本综述的贡献如下：
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item 统一的数学框架，四种算法使用一致的符号表示，可直接进行跨算法目标函数和设计选择的比较。
+\item 系统的架构比较，涵盖网络需求、裁剪策略、损失粒度和KL约束机制。
+\item 在数学推理基准上的实验评估，包含训练效率、模型质量和资源利用的量化结果。
+\item 基于任务特征和资源约束的实用算法选择指南。
+\end{enumerate}
+
+本文其余部分组织如下：第\ref{sec:bg}节建立背景和符号；第\ref{sec:ppo}--\ref{sec:dapo}节详细介绍每个算法；第\ref{sec:compare}节进行比较分析；第\ref{sec:exp}节展示实验结果；第\ref{sec:discuss}节讨论影响和未来方向；第\ref{sec:conclusion}节为结论。

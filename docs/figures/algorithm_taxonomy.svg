@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1144.8pt" height="856.8pt" viewBox="0 0 1144.8 856.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-04-17T11:18:42.826723</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 856.8 
+L 1144.8 856.8 
+L 1144.8 0 
+L 0 0 
+z
+" style="fill: #f5f7fa"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 413.4375 147.6 
+L 731.3625 147.6 
+Q 734.895 147.6 734.895 144.09 
+L 734.895 80.91 
+Q 734.895 77.4 731.3625 77.4 
+L 413.4375 77.4 
+Q 409.905 77.4 409.905 80.91 
+L 409.905 144.09 
+Q 409.905 147.6 413.4375 147.6 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #2c3e50; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 166.1625 265.185 
+L 413.4375 265.185 
+Q 416.97 265.185 416.97 261.675 
+L 416.97 202.005 
+Q 416.97 198.495 413.4375 198.495 
+L 166.1625 198.495 
+Q 162.63 198.495 162.63 202.005 
+L 162.63 261.675 
+Q 162.63 265.185 166.1625 265.185 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #2980b9; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 731.3625 265.185 
+L 978.6375 265.185 
+Q 982.17 265.185 982.17 261.675 
+L 982.17 202.005 
+Q 982.17 198.495 978.6375 198.495 
+L 731.3625 198.495 
+Q 727.83 198.495 727.83 202.005 
+L 727.83 261.675 
+Q 727.83 265.185 731.3625 265.185 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #e74c3c; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 84.915 391.545 
+L 282.735 391.545 
+Q 286.2675 391.545 286.2675 388.035 
+L 286.2675 328.365 
+Q 286.2675 324.855 282.735 324.855 
+L 84.915 324.855 
+Q 81.3825 324.855 81.3825 328.365 
+L 81.3825 388.035 
+Q 81.3825 391.545 84.915 391.545 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #3498db; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 318.06 391.545 
+L 515.88 391.545 
+Q 519.4125 391.545 519.4125 388.035 
+L 519.4125 328.365 
+Q 519.4125 324.855 515.88 324.855 
+L 318.06 324.855 
+Q 314.5275 324.855 314.5275 328.365 
+L 314.5275 388.035 
+Q 314.5275 391.545 318.06 391.545 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #27ae60; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 558.27 391.545 
+L 756.09 391.545 
+Q 759.6225 391.545 759.6225 388.035 
+L 759.6225 328.365 
+Q 759.6225 324.855 756.09 324.855 
+L 558.27 324.855 
+Q 554.7375 324.855 554.7375 328.365 
+L 554.7375 388.035 
+Q 554.7375 391.545 558.27 391.545 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #9b59b6; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 791.415 391.545 
+L 989.235 391.545 
+Q 992.7675 391.545 992.7675 388.035 
+L 992.7675 328.365 
+Q 992.7675 324.855 989.235 324.855 
+L 791.415 324.855 
+Q 787.8825 324.855 787.8825 328.365 
+L 787.8825 388.035 
+Q 787.8825 391.545 791.415 391.545 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #e74c3c; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 77.85 561.78 
+L 289.8 561.78 
+L 289.8 407.34 
+L 77.85 407.34 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #3498db; opacity: 0.1; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #3498db; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 310.995 561.78 
+L 522.945 561.78 
+L 522.945 407.34 
+L 310.995 407.34 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #27ae60; opacity: 0.1; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #27ae60; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 551.205 561.78 
+L 763.155 561.78 
+L 763.155 407.34 
+L 551.205 407.34 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #9b59b6; opacity: 0.1; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #9b59b6; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 784.35 561.78 
+L 996.3 561.78 
+L 996.3 407.34 
+L 784.35 407.34 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #e74c3c; opacity: 0.1; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #e74c3c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 130.8375 702.18 
+L 307.4625 702.18 
+Q 310.995 702.18 310.995 698.67 
+L 310.995 649.53 
+Q 310.995 646.02 307.4625 646.02 
+L 130.8375 646.02 
+Q 127.305 646.02 127.305 649.53 
+L 127.305 698.67 
+Q 127.305 702.18 130.8375 702.18 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #e74c3c; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 413.4375 702.18 
+L 590.0625 702.18 
+Q 593.595 702.18 593.595 698.67 
+L 593.595 649.53 
+Q 593.595 646.02 590.0625 646.02 
+L 413.4375 646.02 
+Q 409.905 646.02 409.905 649.53 
+L 409.905 698.67 
+Q 409.905 702.18 413.4375 702.18 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #f39c12; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 696.0375 702.18 
+L 872.6625 702.18 
+Q 876.195 702.18 876.195 698.67 
+L 876.195 649.53 
+Q 876.195 646.02 872.6625 646.02 
+L 696.0375 646.02 
+Q 692.505 646.02 692.505 649.53 
+L 692.505 698.67 
+Q 692.505 702.18 696.0375 702.18 
+z
+" clip-path="url(#pbbb3fbc5b1)" style="fill: #27ae60; opacity: 0.9; stroke: #ffffff; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 18px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #2c3e50" x="572.4" y="42.3" transform="rotate(-0 572.4 42.3)">RL Algorithms for LLM Training: Taxonomy</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(510.65 108.528906)">RL for LLM Training</text>
+    <text style="font-weight: 700; font-size: 13px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(520.4 123.885156)">LLM 强化学习训练</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(248.55 228.479844)">Policy Gradient</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(256.8 241.473594)">策略梯度方法</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(811 228.436875)">Preference-based</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(822 241.430625)">基于偏好方法</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 464.422553 144.09 
+Q 378.111807 144.09 294.037129 144.09 
+" style="fill: none; stroke: #7f8c8d; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 298.037129 146.09 
+L 294.037129 144.09 
+L 298.037129 142.09 
+" style="fill: none; stroke: #7f8c8d; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 680.377447 144.09 
+Q 766.688193 144.09 850.762871 144.09 
+" style="fill: none; stroke: #7f8c8d; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 846.762871 142.09 
+L 850.762871 144.09 
+L 846.762871 146.09 
+" style="fill: none; stroke: #7f8c8d; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(176.325 355.91875)">PPO</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(153.825 366.10625)">Actor-Critic</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(406.97 355.867969)">GRPO</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(389.47 366.157031)">Group-based</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(647.18 355.91875)">DAPO</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(624.68 366.10625)">Dynamic+Token</text>
+   </g>
+   <g id="patch_18">
+    <path d="M 252.478482 263.43 
+Q 219.151122 263.43 187.500813 263.43 
+" style="fill: none; stroke: #3498db; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 191.500813 265.43 
+L 187.500813 263.43 
+L 191.500813 261.43 
+" style="fill: none; stroke: #3498db; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 327.123458 263.43 
+Q 371.047307 263.43 413.294105 263.43 
+" style="fill: none; stroke: #27ae60; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 409.294105 261.43 
+L 413.294105 263.43 
+L 409.294105 265.43 
+" style="fill: none; stroke: #27ae60; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 468.424644 263.43 
+Q 561.80146 263.43 653.501225 263.43 
+" style="fill: none; stroke: #9b59b6; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 649.501225 261.43 
+L 653.501225 263.43 
+L 649.501225 265.43 
+" style="fill: none; stroke: #9b59b6; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(882.825 355.91875)">DPO</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(857.825 366.10625)">Bradley-Terry</text>
+   </g>
+   <g id="patch_21">
+    <path d="M 856.996518 263.43 
+Q 872.661962 263.43 886.650356 263.43 
+" style="fill: none; stroke: #e74c3c; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 882.650356 261.43 
+L 886.650356 263.43 
+L 882.650356 265.43 
+" style="fill: none; stroke: #e74c3c; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #3498db" transform="translate(156.2 472.158633)">Value Network</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #3498db" transform="translate(156.2 482.086367)">GAE Advantage</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #3498db" transform="translate(156.2 491.914492)">Entropy Bonus</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #3498db" transform="translate(145.575 501.742617)">Multi-epoch Update</text>
+   </g>
+   <g id="patch_22">
+    <path d="M 183.825 391.79094 
+Q 183.825 398.565183 183.825 403.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #3498db; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 185.825 399.997784 
+L 183.825 403.997784 
+L 181.825 399.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #3498db; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #27ae60" transform="translate(382.97 472.108828)">No Value Network</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #27ae60" transform="translate(385.095 482.036563)">Group Advantage</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #27ae60" transform="translate(395.72 491.864688)">KL Penalty</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #27ae60" transform="translate(382.97 501.792422)">Fixed Group Size</text>
+   </g>
+   <g id="patch_23">
+    <path d="M 416.97 391.79094 
+Q 416.97 398.565183 416.97 403.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #27ae60; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 418.97 399.997784 
+L 416.97 403.997784 
+L 414.97 399.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #27ae60; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #9b59b6" transform="translate(629.555 472.142031)">Dynamic Group</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #9b59b6" transform="translate(625.305 482.069766)">Overlong Filter</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #9b59b6" transform="translate(623.18 491.897891)">Token-level Loss</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #9b59b6" transform="translate(627.43 501.825625)">Reward Shaping</text>
+   </g>
+   <g id="patch_24">
+    <path d="M 657.18 391.79094 
+Q 657.18 398.565183 657.18 403.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #9b59b6; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 659.18 399.997784 
+L 657.18 403.997784 
+L 655.18 399.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #9b59b6; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #e74c3c" transform="translate(858.45 472.158633)">No Reward Model</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #e74c3c" transform="translate(856.325 481.986758)">Preference Pairs</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #e74c3c" transform="translate(858.45 491.814883)">Implicit Reward</text>
+    <text style="font-weight: 700; font-size: 8.5px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; fill: #e74c3c" transform="translate(858.45 501.742617)">Simple &amp; Stable</text>
+   </g>
+   <g id="patch_25">
+    <path d="M 890.325 391.79094 
+Q 890.325 398.565183 890.325 403.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #e74c3c; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 892.325 399.997784 
+L 890.325 403.997784 
+L 888.325 399.997784 
+" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #e74c3c; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 284.734968 358.2 
+Q 293.331962 358.2 299.13387 358.2 
+" style="fill: none; stroke: #95a5a6; stroke-width: 2.5; stroke-linecap: round"/>
+    <path d="M 295.13387 356.2 
+L 299.13387 358.2 
+L 295.13387 360.2 
+" style="fill: none; stroke: #95a5a6; stroke-width: 2.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_13">
+    <text style="font-style: italic; font-size: 8px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #95a5a6" x="289.8" y="323.1" transform="rotate(-0 289.8 323.1)">evolves</text>
+   </g>
+   <g id="patch_27">
+    <path d="M 517.879968 358.2 
+Q 526.476962 358.2 532.27887 358.2 
+" style="fill: none; stroke: #95a5a6; stroke-width: 2.5; stroke-linecap: round"/>
+    <path d="M 528.27887 356.2 
+L 532.27887 358.2 
+L 528.27887 360.2 
+" style="fill: none; stroke: #95a5a6; stroke-width: 2.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_14">
+    <text style="font-style: italic; font-size: 8px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #95a5a6" x="530.01" y="323.1" transform="rotate(-0 530.01 323.1)">extends</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="219.15" y="676.63125" transform="rotate(-0 219.15 676.63125)">Memory: High</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="501.75" y="676.63125" transform="rotate(-0 501.75 676.63125)">Memory: Medium</text>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #ffffff" x="784.35" y="676.63125" transform="rotate(-0 784.35 676.63125)">Memory: Low</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 9px; font-family: 'SimHei', 'Microsoft YaHei', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #7f8c8d" x="572.4" y="744.3" transform="rotate(-0 572.4 744.3)">PPO (High) -&gt; GRPO/DAPO (Medium) -&gt; DPO (Low)</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pbbb3fbc5b1">
+   <rect x="7.2" y="7.2" width="1130.4" height="842.4"/>
+  </clipPath>
+ </defs>
+</svg>

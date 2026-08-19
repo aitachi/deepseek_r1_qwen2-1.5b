@@ -1,0 +1,141 @@
+[
+  {
+    "id": 1,
+    "question": "If f(x) = 3x^2 + 2x - 5, what is f(2)?",
+    "correct_answer": "11",
+    "reasoning_steps": [
+      "Substitute x = 2 into the function",
+      "f(2) = 3(2)^2 + 2(2) - 5",
+      "f(2) = 3(4) + 4 - 5",
+      "f(2) = 12 + 4 - 5",
+      "f(2) = 11"
+    ],
+    "difficulty": "easy",
+    "category": "algebra"
+  },
+  {
+    "id": 2,
+    "question": "Solve the equation: 2x + 5 = 13",
+    "correct_answer": "4",
+    "reasoning_steps": [
+      "Subtract 5 from both sides: 2x + 5 - 5 = 13 - 5",
+      "Simplify: 2x = 8",
+      "Divide both sides by 2: x = 8/2",
+      "Final answer: x = 4"
+    ],
+    "difficulty": "easy",
+    "category": "algebra"
+  },
+  {
+    "id": 3,
+    "question": "What is the derivative of f(x) = x^3 + 4x^2 - 2x + 7?",
+    "correct_answer": "3x^2 + 8x - 2",
+    "reasoning_steps": [
+      "Apply power rule to each term",
+      "d/dx(x^3) = 3x^2",
+      "d/dx(4x^2) = 8x",
+      "d/dx(-2x) = -2",
+      "d/dx(7) = 0",
+      "Combine: f'(x) = 3x^2 + 8x - 2"
+    ],
+    "difficulty": "medium",
+    "category": "calculus"
+  },
+  {
+    "id": 4,
+    "question": "A train travels 240 km in 3 hours. What is its average speed in km/h?",
+    "correct_answer": "80",
+    "reasoning_steps": [
+      "Use formula: Speed = Distance / Time",
+      "Speed = 240 km / 3 hours",
+      "Speed = 80 km/h"
+    ],
+    "difficulty": "easy",
+    "category": "arithmetic"
+  },
+  {
+    "id": 5,
+    "question": "Find the sum of the first 10 natural numbers.",
+    "correct_answer": "55",
+    "reasoning_steps": [
+      "Use formula: Sum = n(n+1)/2 where n=10",
+      "Sum = 10(10+1)/2",
+      "Sum = 10(11)/2",
+      "Sum = 110/2",
+      "Sum = 55"
+    ],
+    "difficulty": "easy",
+    "category": "sequences"
+  },
+  {
+    "id": 6,
+    "question": "If the area of a circle is 25π square units, what is its radius?",
+    "correct_answer": "5",
+    "reasoning_steps": [
+      "Use formula: Area = πr^2",
+      "Given: 25π = πr^2",
+      "Divide both sides by π: 25 = r^2",
+      "Take square root: r = √25",
+      "r = 5 units"
+    ],
+    "difficulty": "medium",
+    "category": "geometry"
+  },
+  {
+    "id": 7,
+    "question": "Simplify: (2x + 3)(x - 4)",
+    "correct_answer": "2x^2 - 5x - 12",
+    "reasoning_steps": [
+      "Apply FOIL method",
+      "First: 2x * x = 2x^2",
+      "Outer: 2x * (-4) = -8x",
+      "Inner: 3 * x = 3x",
+      "Last: 3 * (-4) = -12",
+      "Combine like terms: 2x^2 + (-8x + 3x) - 12 = 2x^2 - 5x - 12"
+    ],
+    "difficulty": "medium",
+    "category": "algebra"
+  },
+  {
+    "id": 8,
+    "question": "What is 15% of 200?",
+    "correct_answer": "30",
+    "reasoning_steps": [
+      "Convert 15% to decimal: 15/100 = 0.15",
+      "Multiply: 0.15 × 200",
+      "Result: 30"
+    ],
+    "difficulty": "easy",
+    "category": "arithmetic"
+  },
+  {
+    "id": 9,
+    "question": "Solve for x: x^2 - 5x + 6 = 0",
+    "correct_answer": "x = 2 or x = 3",
+    "reasoning_steps": [
+      "Factor the quadratic equation",
+      "Find two numbers that multiply to 6 and add to -5",
+      "Those numbers are -2 and -3",
+      "(x - 2)(x - 3) = 0",
+      "Set each factor to zero:",
+      "x - 2 = 0 → x = 2",
+      "x - 3 = 0 → x = 3"
+    ],
+    "difficulty": "medium",
+    "category": "algebra"
+  },
+  {
+    "id": 10,
+    "question": "Find the slope of the line passing through points (2, 3) and (5, 9).",
+    "correct_answer": "2",
+    "reasoning_steps": [
+      "Use slope formula: m = (y2 - y1) / (x2 - x1)",
+      "Let (x1, y1) = (2, 3) and (x2, y2) = (5, 9)",
+      "m = (9 - 3) / (5 - 2)",
+      "m = 6 / 3",
+      "m = 2"
+    ],
+    "difficulty": "medium",
+    "category": "geometry"
+  }
+]

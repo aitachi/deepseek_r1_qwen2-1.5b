@@ -1,0 +1,112 @@
+% Section 4: DPO and GRPO
+\section{Direct Preference Optimization (DPO)}
+\label{sec:dpo}
+
+\subsection{Motivation: Simplifying the RLHF Pipeline}
+
+DPO~\cite{rafailov2023dpo}, proposed by Rafailov et al.\ in 2023, represents a paradigm shift in LLM alignment. Instead of training an explicit reward model and then optimizing it with RL, DPO derives a closed-form loss function that directly optimizes the policy from preference data. The key theoretical insight is that the optimal RLHF policy has a closed-form solution.
+
+\subsection{Derivation from the KL-Constrained RLHF Objective}
+
+The KL-constrained RLHF optimization problem seeks:
+\begin{equation}
+\max_\pi \E_{x \sim \mathcal{D}, y \sim \pi}\left[r(x,y)\right] - \beta \cdot D_{\text{KL}}\!\left[\pi(\cdot|x) \| \pi_{\text{ref}}(\cdot|x)\right]
+\end{equation}
+
+The closed-form optimal policy is:
+\begin{equation}
+\pi^*(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\!\left(\frac{1}{\beta}r(x,y)\right)
+\end{equation}
+where $Z(x) = \sum_y \pi_{\text{ref}}(y|x)\exp(r(x,y)/\beta)$ is the partition function (intractable to compute but cancels in the loss).
+
+\subsection{The DPO Loss Function}
+
+By substituting the optimal policy into the Bradley-Terry preference model and rearranging, we obtain the DPO loss that depends only on the policy and reference model:
+\begin{equation}
+\boxed{
+\begin{aligned}
+L^{\text{DPO}}(\theta) &= -\E_{(x,y_w,y_l)}\bigl[\log\sigma\bigl(\beta\cdot h(y_w,y_l,x)\bigr)\bigr] \\
+h(y_w,y_l,x) &= \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}
+\end{aligned}
+}
+\label{eq:dpo}
+\end{equation}
+
+\textbf{Interpretation:} The term inside $\sigma(\cdot)$ is the difference in log-ratios between the preferred and rejected responses. DPO increases the likelihood of $y_w$ relative to $\pi_{\text{ref}}$ more than it increases the likelihood of $y_l$. The temperature $\beta$ controls how sharply the model distinguishes between preferred and rejected outputs.
+
+The implicit reward recovered from the trained policy is:
+\begin{equation}
+\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}
+\end{equation}
+
+\subsection{Architectural Requirements}
+
+DPO requires only \textbf{two model components}: the trainable policy $\pi_\theta$ and the frozen reference $\pi_{\text{ref}}$. No reward model or value network is needed, significantly simplifying the training pipeline. Memory requirements are approximately half those of PPO.
+
+\subsection{Strengths and Limitations}
+
+\textbf{Strengths:} Simplest implementation among all four algorithms; no reward model training required; stable training dynamics; compatible with offline preference data.
+
+\textbf{Limitations:} Requires pre-collected preference pairs $(y_w, y_l)$, which are expensive to obtain; cannot leverage online exploration; performance is bounded by the quality and coverage of preference data; not suitable for tasks with objective reward signals (e.g., mathematical verification).
+
+%=============================================================
+\section{Group Relative Policy Optimization (GRPO)}
+\label{sec:grpo}
+
+\subsection{Eliminating the Value Network via Group Baselines}
+
+GRPO~\cite{deepseek2025r1, shao2024deepseekmath}, introduced by the DeepSeek team in early 2025, addresses the primary limitation of PPO---the need for a separate value network. The key insight is that for tasks with deterministic, rule-based reward functions (e.g., mathematical answer verification), the advantage can be estimated using group-level statistics instead of a learned value function.
+
+\subsection{Group Advantage Estimation}
+
+For each prompt $q$, GRPO generates a group of $G$ responses $\{o_1, o_2, \ldots, o_G\}$ from the current policy. Each response receives a reward $R_i = r(q, o_i)$. The advantage is computed via group normalization:
+\begin{equation}
+\hat{A}_i = \frac{R_i - \mu_G}{\sigma_G + \epsilon}
+\label{eq:grpo_adv}
+\end{equation}
+where:
+\begin{equation}
+\mu_G = \frac{1}{G}\sum_{j=1}^{G}R_j, \quad \sigma_G = \sqrt{\frac{1}{G}\sum_{j=1}^{G}(R_j - \mu_G)^2}
+\end{equation}
+
+\textbf{Intuition:} The advantage measures how much better (or worse) a particular response is relative to the group average. A response with $R_i > \mu_G$ receives positive advantage and is reinforced; a response with $R_i < \mu_G$ receives negative advantage and is suppressed. This is analogous to leave-one-out baseline methods in RL literature.
+
+\subsection{GRPO Objective Function}
+
+The GRPO objective combines clipped surrogate optimization with an explicit KL penalty:
+\begin{equation}
+\boxed{
+\begin{aligned}
+J_{\text{GRPO}}(\theta) = \E&_{q \sim \mathcal{D}}\biggl[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\Bigl(r_{i,t}\hat{A}_i, \\
+&\text{clip}(r_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_i\Bigr) - \beta D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})\biggr]
+\end{aligned}
+}
+\label{eq:grpo}
+\end{equation}
+where $r_{i,t} = \pi_\theta(o_{i,t}|q, o_{i,<t}) / \pi_{\theta_{\text{old}}}(o_{i,t}|q, o_{i,<t})$ is the token-level importance ratio.
+
+The KL divergence uses the unbiased estimator proposed by the GRPO authors:
+\begin{equation}
+D_{\text{KL}} = \frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,<t})}{\pi_\theta(o_{i,t}|q, o_{i,<t})} - \log\frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,<t})}{\pi_\theta(o_{i,t}|q, o_{i,<t})} - 1
+\end{equation}
+
+\subsection{Algorithm Procedure}
+
+The GRPO training loop proceeds as follows:
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item Sample a batch of prompts $\{q_1, \ldots, q_B\}$ from $\mathcal{D}$.
+\item For each prompt, generate $G$ responses using the current policy $\pi_\theta$.
+\item Compute rewards $\{R_1, \ldots, R_G\}$ using the rule-based verifier.
+\item Compute group-normalized advantages $\hat{A}_i$ via Eq.~\ref{eq:grpo_adv}.
+\item Update $\theta$ by maximizing the GRPO objective (Eq.~\ref{eq:grpo}).
+\end{enumerate}
+
+\subsection{Architectural Requirements}
+
+GRPO requires only \textbf{two model components}: the policy $\pi_\theta$ and the reference model $\pi_{\text{ref}}$. No value network or reward model is needed for rule-based reward tasks. This reduces GPU memory by approximately 50\% compared to PPO.
+
+\subsection{Strengths and Limitations}
+
+\textbf{Strengths:} Eliminates the value network (50\% memory reduction); natural fit for verifiable tasks; group sampling provides stable advantage estimates; simpler engineering than PPO.
+
+\textbf{Limitations:} Requires $G$ inferences per prompt (group sampling overhead); symmetric clipping can cause entropy collapse; sample-level normalization biases toward short responses; requires rule-based reward (not suitable for subjective preference alignment).
